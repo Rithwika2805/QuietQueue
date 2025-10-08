@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Slot Booking - Login</title>
+  <link rel="stylesheet" href="style1.css" />
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <h2>📚 IIIT Allahabad Library</h2>
+      <p>Login to book your reading slot</p>
+
+      <div class="input-box">
+        <span class="icon">👤</span>
+        <input type="text" id="username" placeholder="Enter Username" />
+      </div>
+
+      <div class="input-box">
+        <span class="icon">🔒</span>
+        <input type="password" id="password" placeholder="Enter Password" />
+        <span class="toggle-password" onclick="togglePassword()">👁️</span>
+      </div>
+
+      <!-- CAPTCHA -->
+      <div class="captcha-box">
+        <canvas id="captchaCanvas" width="120" height="40"></canvas>
+        <button onclick="generateCaptcha()">↻</button>
+      </div>
+      <input type="text" id="captchaInput" placeholder="Enter CAPTCHA" />
+
+      <button class="login-btn" onclick="validateLogin()">Log In</button>
+
+      <div class="links">
+        <a href="#" onclick="openModal('forgotModal')">Forgot Password?</a>
+        <a href="registration.html">Sign Up</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('forgotModal')">&times;</span>
+      <h3>Reset Password</h3>
+      <p>Enter your registered email address to receive a reset link</p>
+      <input type="email" id="resetEmail" placeholder="Email Address" />
+      <button onclick="resetPassword()">Send Reset Link</button>
+    </div>
+  </div>
+
+  <script src="script1.js"></script>
+</body>
+</html>
