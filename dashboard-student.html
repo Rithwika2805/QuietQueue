@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Specific CSS for Dashboard - added here for simplicity */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 15px;
+            width: 20px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            padding: 30px 5%;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            margin-right: 20px;
+        }
+
+        .bell-icon {
+            font-size: 1.2em;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr; /* Adjust as per visual */
+            gap: 20px;
+        }
+
+        .d-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .d-card.cta-large {
+            grid-column: 1 / 2;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.5em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .d-card.cta-large .btn {
+            background-color: white;
+            color: var(--primary-color);
+            padding: 12px 25px;
+            margin-top: 20px;
+            font-size: 0.8em;
+            border-radius: 6px;
+        }
+
+        .d-card h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        .activity-section {
+            grid-column: 1 / 3;
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .activity-section h2 {
+            margin-bottom: 15px;
+        }
+
+        .recent-activity-card {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open"></i> QuietQueue
+            </div>
+            <nav>
+                <a href="seat-layout.html" class="nav-link active"><i class="fa-solid fa-chair"></i> Book Seats</a>
+                <a href="history.html" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> View History</a>
+                <a href="book-search.html" class="nav-link"><i class="fa-solid fa-search"></i> Search Books</a>
+                <a href="profile.html" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="user-info">Hello, User</div>
+                <i class="fa-solid fa-bell bell-icon"></i>
+            </header>
+
+            <div class="dashboard-cards">
+                <div class="d-card cta-large">
+                    <i class="fa-solid fa-chair fa-3x"></i>
+                    <h2>Book Seats Now</h2>
+                    <a href="seat-layout.html" class="btn">Book Now</a>
+                </div>
+
+                <div class="d-card">
+                    <h3>Quick Book Search</h3>
+                    <div style="display: flex; border: 1px solid #ccc; border-radius: 4px; padding: 5px;">
+                        <input type="text" placeholder="Enter ISBN or Title" style="border: none; flex-grow: 1; padding: 5px;">
+                        <i class="fa-solid fa-search" style="padding: 5px;"></i>
+                    </div>
+                </div>
+                
+                <div class="d-card" style="text-align: left;">
+                    <h3>Upcoming Booking:</h3>
+                    <p style="font-size: 0.9em;">
+                        <i class="fa-solid fa-calendar-alt"></i> Oct 15, 10 AM - 12 PM<br>
+                        <i class="fa-solid fa-map-pin"></i> Zone 3, Seat A5
+                    </p>
+                </div>
+            </div>
+
+            <div class="activity-section">
+                <div class="d-card recent-activity-card">
+                    <h2>Recent Activity</h2>
+                    <p style="color: #666;">View your last 3 bookings or searches here.</p>
+                </div>
+                <div class="d-card recent-activity-card">
+                    <h2>Notifications</h2>
+                    <ul style="list-style: none; text-align: left;">
+                        <li><i class="fa-solid fa-circle-check" style="color: green;"></i> Booking confirmed for Oct 19th</li>
+                        <li><i class="fa-solid fa-book"></i> New book alert: 'Let Us C++'</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

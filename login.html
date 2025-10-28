@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Library System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Specific CSS for Login Page - added here for simplicity */
+        .login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            width: 380px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .role-selection {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            padding: 10px 0;
+            border-radius: 4px;
+            background-color: var(--background-color);
+        }
+        
+        .role-selection label {
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .captcha-placeholder {
+            height: 50px;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .login-card .btn-login {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .footer-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-card">
+        <h2>Welcome Back</h2>
+        <form action="#" method="POST">
+            <div class="form-group">
+                <input type="email" placeholder="Email Address" required>
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="Password" required>
+            </div>
+
+            <div class="role-selection">
+                <label>
+                    <input type="radio" name="role" value="student" checked> Student
+                </label>
+                <label>
+                    <input type="radio" name="role" value="admin"> Admin
+                </label>
+            </div>
+
+            <div class="captcha-placeholder">
+                [CAPTCHA Widget Placeholder]
+            </div>
+
+            <button type="submit" class="btn btn-login">Login</button>
+        </form>
+
+        <div class="footer-links">
+            <a href="#">Forgot Password?</a> |
+            <span>Don't have an account? <a href="register.html">Register Here</a></span>
+        </div>
+    </div>
+</body>
+</html>
