@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login - QuietQueue</title>
+
+    <!-- Shared site CSS (static folder) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- External fonts & icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Page-specific CSS (kept inline like your original) -->
+    <style>
+        /* Specific CSS for Login Page - kept inline for clarity */
+        .login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            width: 380px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            background: white;
+        }
+
+        .role-selection {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            padding: 10px 0;
+            border-radius: 4px;
+            background-color: var(--background-color);
+        }
+
+        .role-selection label {
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .captcha-placeholder {
+            height: 50px;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .login-card .btn-login {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            margin-top: 10px;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+        }
+
+        .login-card .btn-login:hover {
+            background-color: #008f86;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .footer-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        .flash {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #fdecea;
+            color: #611a15;
+            border: 1px solid #f5c6cb;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-card">
+        <h2>Welcome Back</h2>
+
+        <!-- Flash messages (from Flask) -->
+        {% with messages = get_flashed_messages(with_categories=false) %}
+            {% if messages %}
+                <div class="flash">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Login form (posts to the /login route) -->
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email Address" required>
+            </div>
+
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+
+            <div class="role-selection">
+                <label>
+                    <input type="radio" name="role" value="student" checked> Student
+                </label>
+                <label>
+                    <input type="radio" name="role" value="admin"> Admin
+                </label>
+            </div>
+
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+
+        <div class="footer-links">
+            <a href="{{ url_for('forgot') }}">Forgot Password?</a>
+            <span>Don't have an account? <a href="{{ url_for('register') }}">Register Here</a></span>
+        </div>
+    </div>
+</body>
+</html>
