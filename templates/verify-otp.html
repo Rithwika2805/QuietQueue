@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - QuietQueue</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .otp-container {
+            width: 400px;
+            background-color: white;
+            padding: 40px 35px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .otp-container h2 {
+            color: var(--primary-color, #00897b);
+            margin-bottom: 10px;
+        }
+
+        .otp-container input[type="text"] {
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        .otp-container button {
+            background-color: var(--primary-color, #00897b);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .otp-container a {
+            display: block;
+            margin-top: 15px;
+            color: var(--secondary-color, #f57c00);
+            text-decoration: none;
+        }
+
+        .otp-container a:hover {
+            text-decoration: underline;
+        }
+
+        .flash-messages {
+            margin-top: 10px;
+            color: #d32f2f;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="otp-container">
+        <i class="fa-solid fa-shield-halved fa-3x" style="color:#00897b;"></i>
+        <h2>Verify OTP</h2>
+        <p style="font-size: 0.9em; color: #555;">Enter the 6-digit OTP sent to your email</p>
+
+        <form method="POST" action="{{ url_for('verify_otp') }}">
+            <input type="text" name="otp" id="otp" placeholder="______" maxlength="6" required>
+            <button type="submit">Verify OTP</button>
+        </form>
+
+        <!-- Flash messages -->
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div>{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <a href="{{ url_for('forgot') }}"><i class="fa-solid fa-arrow-left"></i> Re-enter Email</a>
+    </div>
+
+    <!-- Optional JavaScript: allow only numbers -->
+    <script>
+        const otpInput = document.getElementById("otp");
+        otpInput.addEventListener("input", function() {
+            this.value = this.value.replace(/\D/g, ""); // Remove non-digits
+        });
+    </script>
+
+</body>
+</html>
