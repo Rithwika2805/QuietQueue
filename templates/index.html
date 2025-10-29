@@ -13,11 +13,18 @@
         <div class="logo">
             <i class="fa-solid fa-book-open"></i> QuietQueue
         </div>
-        <nav class="auth-links">
-            <a href="{{ url_for('login') }}" class="btn btn-login">Login</a>
-            <a href="{{ url_for('register') }}" class="btn btn-register">Register</a>
-        </nav>
-    </header>
+<nav class="auth-links">
+    {% if 'user_id' in session %}
+        <div class="profile-menu">
+            <a href="{{ url_for('profile') }}" class="btn btn-profile">Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+        </div>
+    {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-login">Login</a>
+        <a href="{{ url_for('register') }}" class="btn btn-register">Register</a>
+    {% endif %}
+</nav>
+</header>
 
     <main class="container">
         <section class="announcements-section">
