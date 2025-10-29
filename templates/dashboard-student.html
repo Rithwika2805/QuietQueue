@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - QuietQueue</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #009DA0;
+            --secondary-color: #f39c12;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f5f7fb;
+            color: var(--text-color);
+        }
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 15px;
+            width: 20px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 30px 5%;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .bell-icon {
+            font-size: 1.3em;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .d-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .d-card.cta-large {
+            grid-column: 1 / 2;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.5em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .d-card.cta-large .btn {
+            background-color: white;
+            color: var(--primary-color);
+            padding: 12px 25px;
+            margin-top: 20px;
+            font-size: 0.8em;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .d-card h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .activity-section {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .recent-activity-card {
+            flex: 1;
+            text-align: left;
+        }
+
+        .recent-activity-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recent-activity-card li {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            .activity-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open"></i> QuietQueue
+            </div>
+            <nav>
+                <a href="{{ url_for('seat_layout') }}" class="nav-link active"><i class="fa-solid fa-chair"></i> Book Seats</a>
+                <a href="{{ url_for('history') }}" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> View History</a>
+                <a href="{{ url_for('book_search') }}" class="nav-link"><i class="fa-solid fa-search"></i> Search Books</a>
+                <a href="{{ url_for('profile') }}" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="user-info">Hello, {{ user_name }}</div>
+                <i class="fa-solid fa-bell bell-icon" onclick="showToast('No new notifications!')"></i>
+            </header>
+
+            <div class="dashboard-cards">
+                <div class="d-card cta-large">
+                    <i class="fa-solid fa-chair fa-3x"></i>
+                    <h2>Book Seats Now</h2>
+                    <a href="{{ url_for('seat_layout') }}" class="btn">Book Now</a>
+                </div>
+
+                <div class="d-card">
+                    <h3>Quick Book Search</h3>
+                    <form action="{{ url_for('book_search') }}" method="GET" style="display: flex; border: 1px solid #ccc; border-radius: 4px; padding: 5px;">
+                        <input type="text" name="q" placeholder="Enter ISBN or Title" style="border: none; flex-grow: 1; padding: 5px;">
+                        <button type="submit" style="background: none; border: none; cursor: pointer;">
+                            <i class="fa-solid fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="d-card" style="text-align: left;">
+                    <h3>Upcoming Booking:</h3>
+                    {% if upcoming_booking %}
+                        <p style="font-size: 0.9em;">
+                            <i class="fa-solid fa-calendar-alt"></i> {{ upcoming_booking.date }} <br>
+                            <i class="fa-solid fa-clock"></i> {{ upcoming_booking.time }} <br>
+                            <i class="fa-solid fa-map-pin"></i> {{ upcoming_booking.zone }}, Seat {{ upcoming_booking.seat }}
+                        </p>
+                    {% else %}
+                        <p style="font-size: 0.9em; color: #888;">No upcoming bookings</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="activity-section">
+                <div class="d-card recent-activity-card">
+                    <h2>Recent Activity</h2>
+                    {% if recent_activity %}
+                        <ul>
+                            {% for activity in recent_activity %}
+                                <li><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-color);"></i> {{ activity }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="color: #666;">No recent activity available.</p>
+                    {% endif %}
+                </div>
+
+                <div class="d-card recent-activity-card">
+                    <h2>Notifications</h2>
+                    {% if notifications %}
+                        <ul>
+                            {% for note in notifications %}
+                                <li><i class="fa-solid fa-bell" style="color: var(--secondary-color);"></i> {{ note }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="color: #666;">You're all caught up!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" style="display:none; position:fixed; top:20px; right:30px; background:var(--primary-color); color:white; padding:12px 20px; border-radius:6px; font-weight:600;">Toast</div>
+
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
+    </script>
+</body>
+</html>
