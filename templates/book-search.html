@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Books - QuietQueue</title>
+
+    <!-- Load CSS from Flask static -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* Same inline CSS copied from original */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+        .sidebar .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+        .nav-link i {
+            margin-right: 15px;
+            width: 20px;
+        }
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 30px 5%;
+        }
+        .search-container {
+            display: flex;
+            gap: 20px;
+        }
+        .search-results {
+            flex-grow: 1;
+        }
+        .search-bar {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+        }
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            font-size: 1.2em;
+        }
+        .search-bar i {
+            font-size: 1.5em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .book-list-item {
+            display: flex;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            align-items: center;
+        }
+        .book-icon {
+            font-size: 2em;
+            color: var(--secondary-color);
+            margin-right: 20px;
+            padding: 10px;
+            background-color: #ffe0b2;
+            border-radius: 4px;
+        }
+        .book-details {
+            flex-grow: 1;
+        }
+        .book-details h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        .book-status {
+            text-align: right;
+        }
+        .status-tag {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .status-available {
+            background-color: #e8f5e9;
+            color: #4CAF50;
+        }
+        .status-on-loan {
+            background-color: #ffebee;
+            color: #F44336;
+        }
+        .search-filters {
+            width: 300px;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        .search-filters h3 {
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        .filter-group {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .filter-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .filter-options {
+            padding-top: 10px;
+        }
+        .filter-options label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open"></i> QuietQueue
+            </div>
+            <nav>
+                <a href="{{ url_for('seat_layout') }}" class="nav-link">
+                    <i class="fa-solid fa-chair"></i> Book Seats
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-link">
+                    <i class="fa-solid fa-clock-rotate-left"></i> View History
+                </a>
+                <a href="{{ url_for('book_search') }}" class="nav-link active">
+                    <i class="fa-solid fa-search"></i> Search Books
+                </a>
+                <a href="{{ url_for('profile') }}" class="nav-link">
+                    <i class="fa-solid fa-user"></i> Profile
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h2>Find Your Next Read</h2>
+
+            <form action="{{ url_for('book_search') }}" method="GET" class="search-bar">
+                <input type="text" name="q" placeholder="Search" value="{{ search_query }}">
+                <i class="fa-solid fa-search"></i>
+            </form>
+
+            <p>Search Results</p>
+
+            {% if books %}
+                {% for book in books %}
+                <div class="book-list-item">
+                    <i class="fa-solid fa-book-open book-icon"></i>
+
+                    <div class="book-details">
+                        <h3>{{ book.title }}</h3>
+                        <p>ISBN# {{ book.isbn }} | By {{ book.author }}</p>
+                    </div>
+
+                    <div class="book-status">
+                        {% if book.available %}
+                            <span class="status-tag status-available">Available</span>
+                        {% else %}
+                            <span class="status-tag status-on-loan">On Loan</span>
+                        {% endif %}
+                        <p style="font-size: 0.8em; color: #666;">{{ book.department }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No books found</p>
+            {% endif %}
+        </main>
+
+        <div class="search-filters">
+            <h3>Search Filters</h3>
+
+            {% for filter_group in filters %}
+            <div class="filter-group">
+                <div class="filter-group-header">
+                    {{ filter_group.name }} <i class="fa-solid fa-chevron-up"></i>
+                </div>
+                <div class="filter-options">
+                    {% for option in filter_group.options %}
+                    <label>
+                        <input type="checkbox" name="filter_{{ filter_group.id }}" value="{{ option.value }}">
+                        {{ option.label }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</body>
+</html>
