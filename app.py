@@ -10,6 +10,18 @@ import os
 app = Flask(__name__)
 app.secret_key = "quietqueue_secret_key"
 
+from flask_mail import Mail, Message
+import random
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'rithwika.mode@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ruym fekc fekp albm'
+
+mail = Mail(app)
+
+
 # ---------------------------------------------
 # 🗄️ MySQL Database Configuration
 # ---------------------------------------------
@@ -108,7 +120,7 @@ def logout():
     return redirect(url_for('login'))
 
 # ---------- FORGOT PASSWORD ----------
-@app.route('/forgot', methods=['GET', 'POST'])
+@app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot():
     if request.method == 'POST':
         email = request.form['email']
@@ -121,13 +133,45 @@ def forgot():
             flash("No account found with that email.")
             return redirect(url_for('forgot'))
 
+        otp = random.randint(100000, 999999)  # 6-digit OTP
+
+        # Save OTP temporarily in session
         session['reset_email'] = email
-        return redirect(url_for('reset_password'))
+        session['otp'] = otp
+
+        # Send OTP Email
+        msg = Message("QuietQueue - OTP Verification",
+                      sender="yourgmail@gmail.com",
+                      recipients=[email])
+        msg.body = f"Your OTP for password reset is: {otp}"
+        mail.send(msg)
+
+        flash("OTP sent to your email!")
+        return redirect(url_for('verify_otp'))
 
     return render_template('forgot.html')
 
+# ---------- VERIFY OTP ----------
+@app.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp():
+    if 'reset_email' not in session:
+        flash("Session expired. Try again.")
+        return redirect(url_for('forgot'))
+
+    if request.method == 'POST':
+        user_otp = request.form['otp']
+        if str(user_otp) == str(session.get('otp')):
+            session.pop('otp')
+            return redirect(url_for('reset_password'))
+        else:
+            flash("Invalid OTP. Try again.")
+            return redirect(url_for('verify_otp'))
+
+    return render_template('verify-otp.html')
+
+
 # ---------- RESET PASSWORD ----------
-@app.route('/reset', methods=['GET', 'POST'])
+@app.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
     if 'reset_email' not in session:
         flash("Session expired. Try again.")
