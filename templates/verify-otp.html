@@ -86,6 +86,22 @@
             <button type="submit">Verify OTP</button>
         </form>
 
+        <p id="timer" style="color: #555; font-size: 14px;">OTP expires in 5:00</p>
+        <script>
+           let timeLeft = 300;
+           const timerEl = document.getElementById('timer');
+           const timer = setInterval(() => {
+           let min = Math.floor(timeLeft / 60);
+           let sec = timeLeft % 60;
+           timerEl.textContent = `OTP expires in ${min}:${sec.toString().padStart(2, '0')}`;
+           timeLeft--;
+           if (timeLeft < 0) {
+              clearInterval(timer);
+              timerEl.textContent = "OTP expired. Please request a new one.";
+            }
+          }, 1000);
+        </script>
+
         <!-- Flash messages -->
         <div class="flash-messages">
             {% with messages = get_flashed_messages() %}
@@ -97,7 +113,7 @@
             {% endwith %}
         </div>
 
-        <a href="{{ url_for('forgot') }}"><i class="fa-solid fa-arrow-left"></i> Re-enter Email</a>
+        <a href="{{ url_for('forgot_password') }}"><i class="fa-solid fa-arrow-left"></i> Re-enter Email</a>
     </div>
 
     <!-- Optional JavaScript: allow only numbers -->
