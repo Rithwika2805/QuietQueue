@@ -127,17 +127,19 @@
             </div>
 
             <div class="form-group">
-                <input type="email" name="email" placeholder="Institution Email Address" required>
+               <input type="email" name="email" placeholder="Institution Email Address"
+                      pattern="^[a-zA-Z0-9._%+-]+@iiita\.ac\.in$"
+                      title="Please enter a valid IIITA email (e.g., name@iiita.ac.in)" required>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <select name="course" required>
                         <option value="" disabled selected>Select Course</option>
-                        <option value="btech">B.Tech</option>
-                        <option value="mtech">M.Tech</option>
-                        <option value="mba">MBA</option>
-                        <option value="phd">Ph.D</option>
+                        <option value="B.Tech">B.Tech</option>
+                        <option value="M.Tech">M.Tech</option>
+                        <option value="MBA">MBA</option>
+                        <option value="Ph.D">Ph.D</option>
                     </select>
                 </div>
                 <div class="form-group">
