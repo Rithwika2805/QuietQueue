@@ -43,6 +43,8 @@
             padding: 0 20px 20px;
             border-bottom: 1px solid #eee;
             margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.3em;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -85,6 +87,7 @@
             display: flex;
             align-items: center;
             font-weight: 500;
+            font-size: 1.3em;
         }
 
         .bell-icon {
@@ -120,14 +123,23 @@
         .d-card.cta-large .btn {
             background-color: white;
             color: var(--primary-color);
-            padding: 12px 25px;
-            margin-top: 20px;
-            font-size: 0.8em;
-            border-radius: 6px;
-            text-decoration: none;
             font-weight: 600;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            display: inline-block;
         }
 
+        .d-card.cta-large .btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            background-color: #f0f0f0;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
         .d-card h3 {
             font-size: 1.1em;
             margin-bottom: 10px;
@@ -135,12 +147,16 @@
 
         .activity-section {
             margin-top: 30px;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
         }
 
         .recent-activity-card {
-            flex: 1;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             text-align: left;
         }
 
@@ -159,7 +175,7 @@
                 grid-template-columns: 1fr;
             }
             .activity-section {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -180,7 +196,7 @@
 
         <main class="main-content">
             <header class="topbar">
-                <div class="user-info">Hello, {{ user_name }}</div>
+                <div class="user-info"><b>Hello, {{ user_name }}</b></div>
                 <i class="fa-solid fa-bell bell-icon" onclick="showToast('No new notifications!')"></i>
             </header>
 
@@ -205,9 +221,9 @@
                     <h3>Upcoming Booking:</h3>
                     {% if upcoming_booking %}
                         <p style="font-size: 0.9em;">
-                            <i class="fa-solid fa-calendar-alt"></i> {{ upcoming_booking.date }} <br>
-                            <i class="fa-solid fa-clock"></i> {{ upcoming_booking.time }} <br>
-                            <i class="fa-solid fa-map-pin"></i> {{ upcoming_booking.zone }}, Seat {{ upcoming_booking.seat }}
+                            <i class="fa-solid fa-calendar-alt" style="color: var(--primary-color);"></i> {{ upcoming_booking.date }} <br>
+                            <i class="fa-solid fa-clock" style="color: var(--primary-color);"></i> {{ upcoming_booking.time }} <br>
+                            <i class="fa-solid fa-map-pin" style="color: var(--primary-color);"></i> {{ upcoming_booking.zone }}, Seat {{ upcoming_booking.seat }}
                         </p>
                     {% else %}
                         <p style="font-size: 0.9em; color: #888;">No upcoming bookings</p>
@@ -216,7 +232,7 @@
             </div>
 
             <div class="activity-section">
-                <div class="d-card recent-activity-card">
+                <div class="recent-activity-card">
                     <h2>Recent Activity</h2>
                     {% if recent_activity %}
                         <ul>
@@ -229,7 +245,7 @@
                     {% endif %}
                 </div>
 
-                <div class="d-card recent-activity-card">
+                <div class="recent-activity-card">
                     <h2>Notifications</h2>
                     {% if notifications %}
                         <ul>
@@ -239,6 +255,23 @@
                         </ul>
                     {% else %}
                         <p style="color: #666;">You're all caught up!</p>
+                    {% endif %}
+                </div>
+
+                <!-- ✅ NEW ANNOUNCEMENTS SECTION -->
+                <div class="recent-activity-card">
+                    <h2>📢 Announcements</h2>
+                    {% if announcements %}
+                        {% for ann in announcements %}
+                            <div style="background:#f9f9f9; border-left:5px solid var(--primary-color); padding:10px; margin-bottom:10px; border-radius:6px;">
+                                <h4 style="margin:0; color:#333;">{{ ann.title }}</h4>
+                                <p style="margin:5px 0; color:#555;">{{ ann.message }}</p>
+                                <small style="color:#888;">By {{ ann.created_by }} • {{ ann.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                        {% endfor %}
+                        <a href="{{ url_for('student_announcements') }}" style="display:inline-block; margin-top:8px; font-weight:600; text-decoration:none; color:var(--primary-color);">View all →</a>
+                    {% else %}
+                        <p>No announcements yet.</p>
                     {% endif %}
                 </div>
             </div>
