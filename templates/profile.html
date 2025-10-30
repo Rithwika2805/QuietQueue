@@ -197,7 +197,7 @@
 
         .btn-logout {
             float: right;
-            background-color: #F44336;
+            background-color: #009DA0;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -207,7 +207,7 @@
         }
 
         .btn-logout:hover {
-            background-color: #d32f2f;
+            background-color: #007f82;
         }
 
         @media (max-width: 768px) {
@@ -229,9 +229,10 @@
 <body>
     <div class="dashboard-layout">
         <aside class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-book-open"></i> QuietQueue
-            </div>
+            <a href="{{ url_for('student_dashboard') }}" class="logo" style="text-decoration: none; color: #009DA0; font-size: 1.3em;">
+                <i class="fa-solid fa-book-open" style="color: #009DA0;"></i> QuietQueue
+            </a>
+
             <nav>
                 <a href="{{ url_for('seat_layout') }}" class="nav-link"><i class="fa-solid fa-chair"></i> Book Seats</a>
                 <a href="{{ url_for('history') }}" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> View History</a>
@@ -246,9 +247,9 @@
             </div>
 
             <div class="user-details">
-                <p>Roll Number: <span>{{ user.roll }}</span></p>
-                <p>Name: <span>{{ user.name }}</span></p>
-                <p>Department: <span>{{ user.department }}</span></p>
+                <p>Roll Number: <span>{{ user.roll_number }}</span></p>
+                <p>Name: <span>{{ user.full_name }}</span></p>
+                <p>Department: <span>{{ user.course }}</span></p>
                 <p>Semester: <span>{{ user.semester }}</span></p>
             </div>
 
@@ -274,7 +275,7 @@
                     <h3>Update Details</h3>
                     <form action="{{ url_for('update_profile') }}" method="POST">
                         <input type="email" name="email" placeholder="Email Address" value="{{ user.email }}" required>
-                        <input type="text" name="name" placeholder="Full Name" value="{{ user.name }}" required>
+                        <input type="text" name="full_name" placeholder="Full Name" value="{{ user.full_name }}" required>
                         <button type="submit" class="btn-save-changes">Save Changes</button>
                     </form>
                 </div>
