@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Profile - QuietQueue</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+        header {
+            background-color: #00897b;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { font-size: 22px; margin: 0; }
+        header a, header button {
+            background-color: white;
+            color: #00897b;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        header button.logout-btn {
+            background-color: #e53935;
+            color: white;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #00897b;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .profile-info label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .profile-info input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .btn {
+            background-color: #00897b;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+        .btn:hover {
+            background-color: #00796b;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .divider {
+            border-top: 2px solid #f0f0f0;
+            margin: 30px 0;
+        }
+        .flash {
+            color: #e53935;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>👤 Admin Profile</h1>
+        <div>
+            <a href="{{ url_for('admin_dashboard') }}">← Back</a>
+            <form method="POST" action="{{ url_for('logout') }}" style="display:inline;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="section">
+            <h2>Profile Details</h2>
+            <form method="POST" action="{{ url_for('update_admin_profile') }}">
+                <div class="profile-info">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="full_name" value="{{ admin.full_name }}" required>
+
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ admin.email }}" required>
+
+                    <button type="submit" class="btn">Update Profile</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2>Change Password</h2>
+            <form method="POST" action="{{ url_for('update_admin_password') }}">
+                <div class="profile-info">
+                    <label for="new_password">New Password</label>
+                    <input type="password" id="new_password" name="new_password" required>
+
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+
+                    <button type="submit" class="btn">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

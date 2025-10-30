@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Announcements - QuietQueue</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; margin: 0; }
+        header {
+            background-color: #00897b; color: white;
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+        }
+        header h1 { font-size: 22px; margin: 0; }
+        header a {
+            background-color: white; color: #00897b;
+            padding: 8px 16px; border-radius: 6px;
+            text-decoration: none; font-weight: 600;
+        }
+        .container {
+            max-width: 800px; margin: 40px auto;
+            background: white; padding: 30px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .add-section { margin-bottom: 25px; }
+        input, textarea {
+            width: 100%; padding: 10px; margin: 8px 0;
+            border: 1px solid #ccc; border-radius: 6px;
+            font-size: 15px;
+        }
+        button {
+            background-color: #00897b; color: white;
+            border: none; padding: 10px 18px; border-radius: 6px;
+            cursor: pointer; font-weight: 600;
+        }
+        button:hover { background-color: #00796b; }
+        .announcement {
+            border-left: 5px solid #00897b;
+            padding: 15px; margin-bottom: 20px;
+            background-color: #f9f9f9; border-radius: 6px;
+            position: relative;
+        }
+        .announcement h3 { margin: 0 0 8px; color: #333; }
+        .announcement p { margin: 5px 0; color: #555; }
+        .date { font-size: 0.85em; color: #888; }
+        .posted-by { font-size: 0.9em; color: #555; font-style: italic; }
+        .delete-btn {
+            position: absolute; top: 10px; right: 10px;
+            background-color: #e53935; color: white;
+            border: none; padding: 5px 8px;
+            border-radius: 5px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📢 Announcements</h1>
+        <a href="{{ url_for('admin_dashboard') }}">← Back</a>
+    </header>
+
+    <div class="container">
+        <div class="add-section">
+            <h2>Add New Announcement</h2>
+            <input type="text" id="title" placeholder="Title">
+            <textarea id="message" rows="4" placeholder="Announcement message..."></textarea>
+            <button onclick="addAnnouncement()">Add Announcement</button>
+        </div>
+
+        <hr>
+
+        <h2>Recent Announcements</h2>
+        <div id="announcementList">
+            {% for ann in announcements %}
+            <div class="announcement">
+                <button class="delete-btn" onclick="deleteAnnouncement('{{ ann.id }}')">×</button>
+                <h3>{{ ann.title }}</h3>
+                <p>{{ ann.message }}</p>
+                <p class="posted-by">Posted by <strong>{{ ann.created_by }}</strong></p>
+                <p class="date">📅 {{ ann.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+            {% else %}
+            <p>No announcements yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function addAnnouncement() {
+            const title = document.getElementById("title").value.trim();
+            const message = document.getElementById("message").value.trim();
+
+            if (!title || !message) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            fetch("/api/add-announcement", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === "success") location.reload();
+            })
+            .catch(err => alert("Error: " + err));
+        }
+
+        function deleteAnnouncement(id) {
+            if (!confirm("Delete this announcement?")) return;
+
+            fetch(`/api/delete-announcement/${id}`, { method: "DELETE" })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === "success") location.reload();
+            })
+            .catch(err => alert("Error: " + err));
+        }
+    </script>
+</body>
+</html>
