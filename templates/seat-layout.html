@@ -115,6 +115,11 @@
             flex-wrap: wrap; /* Added for better mobile support */
         }
 
+        .control-group div {
+            margin-top: 8px;
+        }
+
+
         .control-group label {
             font-weight: 500;
         }
@@ -268,7 +273,7 @@
             <i class="fa-solid fa-book-open"></i> QuietQueue
         </div>
         <nav class="auth-links">
-            <a href="{{ url_for('dashboard') }}" class="btn btn-login"><i class="fa-solid fa-user"></i> Dashboard</a>
+            <a href="{{ url_for('student_dashboard') }}" class="btn btn-login"><i class="fa-solid fa-user"></i> Dashboard</a>
         </nav>
     </header>
 
@@ -280,24 +285,25 @@
             <div class="control-group">
                 <label for="zone-select"><i class="fa-solid fa-map-pin"></i> Zone:</label>
                 <select id="zone-select">
-                    <option value="zone1">Zone 1 (Silent)</option>
-                    <option value="zone2">Zone 2 (Collaborative)</option>
-                    <option value="zone3">Zone 3 (Collaborative)</option>
-                    <option value="zone4">Zone 4 (Silent)</option>
+                   <option value="zone1">Zone 1 (Silent)</option>
+                   <option value="zone2">Zone 2 (Collaborative)</option>
+                   <option value="zone3">Zone 3 (Collaborative)</option>
+                   <option value="zone4">Zone 4 (Silent)</option>
                 </select>
 
-                <label for="date-select"><i class="fa-solid fa-calendar-alt"></i> Date:</label>
-                <input type="date" id="date-select" value="{{ current_date }}">
+            <label for="date-select"><i class="fa-solid fa-calendar-alt"></i> Date:</label>
+            <input type="date" id="date-select" value="{{ current_date }}">
 
+            <!-- Start & End time moved just below Zone -->
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
                 <label for="from-time"><i class="fa-solid fa-clock"></i> From:</label>
-                <!-- Custom Select element for 00/30 minute control -->
                 <select id="from-time"></select>
 
                 <label for="to-time">To:</label>
-                <!-- Custom Select element for 00/30 minute control -->
                 <select id="to-time"></select>
+            </div>
 
-                <button class="btn btn-select" id="filter-btn">Filter</button>
+            <button class="btn btn-select" id="filter-btn">Filter</button>
             </div>
 
             <div class="legend">
@@ -316,12 +322,22 @@
             <div class="library-map" id="library-map"></div>
         </div>
 
-        <div class="booking-summary" id="booking-summary" style="display: none;">
-            <span>Selected Seat: <span id="selected-seat-label"></span> | Time: <span id="selected-time"></span></span>
-            <button class="btn btn-login" id="confirm-booking-btn">Confirm Booking</button>
-        </div>
-    </main>
-
+        <div id="booking-summary" class="summary" style="display:none;">
+            <p>Selected Seat: <span id="selected-seat-label"></span></p>
+            <p>Selected Time: <span id="selected-time"></span></p>
+            <button id="book-seat-btn" class="btn-book" style="
+                background-color:#007f82;
+                color:#fff;
+                font-weight:600;
+                padding:10px 20px;
+                border:none;
+                border-radius:6px;
+                cursor:pointer;
+                transition:all 0.3s ease;
+                margin-top:8px;
+                display:none;">Book Seat</button>
+            </div>
+        </main>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const mapContainer = document.getElementById('library-map');
@@ -344,14 +360,13 @@
             const rows = 8;
             const cols = 12;
 
-            // --- Time Slot Generation (00 and 30 minutes only, up to 12:00 AM) ---
+            // --- Time Slot Generation ---
             const generateTimeOptions = () => {
-                const openingHour = 9; // 9 AM (09:00)
-                const maxStartHour = 23; // 11 PM (23:00) - Allows slots to start here and end later.
+                const openingHour = 9;
+                const maxStartHour = 23;
 
                 [fromTimeInput, toTimeInput].forEach(selectElement => {
                     selectElement.innerHTML = '';
-                    
                     const defaultOption = document.createElement('option');
                     defaultOption.value = "";
                     defaultOption.textContent = selectElement.id === 'from-time' ? "Start Time" : "End Time";
@@ -361,56 +376,88 @@
 
                     for (let h = openingHour; h <= maxStartHour; h++) {
                         for (let m = 0; m < 60; m += 30) {
-                            
-                            // Generate timeValue (e.g., "09:00", "23:30")
                             const timeValue = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-                            
-                            // Simple AM/PM conversion for display
                             let displayHour = h;
                             let ampm = 'AM';
-                            
                             if (h >= 12) {
                                 ampm = 'PM';
                                 if (h > 12) displayHour = h - 12;
                             }
-                            
                             const option = document.createElement('option');
                             option.value = timeValue;
                             option.textContent = `${displayHour}:${String(m).padStart(2, '0')} ${ampm}`;
-                            
                             selectElement.appendChild(option);
                         }
                     }
-                    
-                    // Add the final 12:00 AM option (24:00) only for the 'To Time' selector.
-                    // A booking can end at 12 AM, but cannot start at 12 AM (closing time).
+
+                    // Add midnight for "To" selector only
                     if (selectElement.id === 'to-time') {
-                        const midnightValue = '24:00';
                         const midnightOption = document.createElement('option');
-                        midnightOption.value = midnightValue;
-                        midnightOption.textContent = `12:00 AM`; // Display 12:00 AM
+                        midnightOption.value = '24:00';
+                        midnightOption.textContent = '12:00 AM';
                         selectElement.appendChild(midnightOption);
                     }
                 });
             };
-            
-            // --- Map Data (Static for Demo) ---
-            const seatMaps = {
-                'zone1': ['A', 'A', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A', 'A', 'A', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'A', 'A', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A', 'A', 'A', 'T', 'T', 'A', 'A', 'E', 'B', 'B', 'T', 'T', 'B', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'B', 'B', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A', 'B', 'B', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A'],
-                'zone2': ['A', 'A', 'A', 'A', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'T', 'T', 'E', 'E', 'E', 'E', 'T', 'T', 'E', 'E', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'T', 'T', 'E', 'E', 'E', 'E', 'T', 'T', 'E', 'E', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'B', 'B', 'B', 'A', 'E', 'E', 'A', 'A', 'A', 'A', 'E', 'E', 'B', 'B', 'B', 'A', 'E', 'E'],
-                'zone3': ['B', 'B', 'T', 'T', 'B', 'B', 'E', 'A', 'A', 'T', 'T', 'A', 'B', 'B', 'T', 'T', 'B', 'B', 'E', 'A', 'A', 'T', 'T', 'A', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'A', 'A', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A', 'A', 'A', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'A', 'A', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A', 'A', 'A', 'T', 'T', 'A', 'A', 'E', 'A', 'A', 'T', 'T', 'A'],
-                'zone4': ['T', 'T', 'A', 'A', 'E', 'T', 'T', 'A', 'A', 'E', 'T', 'T', 'T', 'T', 'A', 'A', 'E', 'T', 'T', 'A', 'A', 'E', 'T', 'T', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'A', 'A', 'B', 'B', 'E', 'A', 'A', 'T', 'T', 'E', 'A', 'A', 'A', 'A', 'B', 'B', 'E', 'A', 'A', 'T', 'T', 'E', 'A', 'A', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'T', 'T', 'A', 'A', 'E', 'T', 'T', 'A', 'A', 'E', 'T', 'T', 'T', 'T', 'A', 'A', 'E', 'T', 'T', 'A', 'A', 'E', 'T', 'T']
+
+            // --- Zone Data (Maps) ---
+            const seatLayouts = {
+                zone1: [
+                    // Use your original Zone 1 pattern here (example shown)
+                    'A','A','A','A','A','A','A','A','A','A','A','A',
+                    'A','T','T','T','T','T','T','T','T','T','T','A',
+                    'A','A','A','A','A','A','A','A','A','A','A','A',
+                    'E','E','E','E','E','E','E','E','E','E','E','E',
+                    'A','A','A','A','A','A','A','A','A','A','A','A',
+                    'A','T','T','T','T','T','T','T','T','T','T','A',
+                    'A','A','A','A','A','A','A','A','A','A','A','A'
+                ],
+                zone2: [
+                    // example collaborative layout: fewer tables, more open seats
+                    'A','A','A','E','A','A','A','A','E','A','A','A',
+                    'A','T','A','E','A','T','T','A','E','A','T','A',
+                    'A','A','A','E','A','A','A','A','E','A','A','A',
+                    'E','E','E','E','E','E','E','E','E','E','E','E',
+                    'A','A','A','E','A','A','A','A','E','A','A','A',
+                    'A','T','A','E','A','T','T','A','E','A','T','A',
+                    'A','A','A','E','A','A','A','A','E','A','A','A'
+                ],
+                zone3: [
+                    // collaborative zone with tables spread evenly
+                    'A','A','A','E','A','A','A','A','E','A','A','A',
+                    'A','T','A','E','A','T','T','A','E','A','T','A',
+                    'A','A','A','E','A','A','A','A','E','A','A','A',
+                    'E','E','E','E','E','E','E','E','E','E','E','E',
+                    'A','A','A','E','A','A','A','A','E','A','A','A',
+                    'A','T','A','E','A','T','T','A','E','A','T','A',
+                    'A','A','A','E','A','A','A','A','E','A','A','A'
+                ],
+                zone4: [
+                    // silent zone — more tables and fewer open seats
+                    'A','A','A','A','A','A','A','A','A','A','A','A',
+                    'T','T','T','T','T','T','T','T','T','T','T','T',
+                    'A','A','A','A','A','A','A','A','A','A','A','A',
+                    'E','E','E','E','E','E','E','E','E','E','E','E',
+                    'A','A','A','A','A','A','A','A','A','A','A','A',
+                    'T','T','T','T','T','T','T','T','T','T','T','T',
+                    'A','A','A','A','A','A','A','A','A','A','A','A'
+                ]
             };
 
-            // --- Main Functions ---
-
-            function regenerateMap() {
+            // --- Render Map for Selected Zone ---
+            function regenerateMap(zoneKey) {
                 mapContainer.innerHTML = '';
-                const currentZone = zoneSelect.value;
-                zoneTitle.textContent = zoneSelect.options[zoneSelect.selectedIndex].textContent;
+                const currentZone = zoneKey || zoneSelect.value;
+                const currentMap = seatLayouts[currentZone] || seatLayouts['zone1'];
+                const zoneNames = {
+                    'zone1': 'Zone 1: Silent Study Area',
+                    'zone2': 'Zone 2: Collaborative Study Area',
+                    'zone3': 'Zone 3: Collaborative Study Area',
+                    'zone4': 'Zone 4: Silent Study Area'
+                };
+                zoneTitle.textContent = zoneNames[currentZone];
 
-                const currentMap = seatMaps[currentZone] || seatMaps['zone1'];
-
+                let seatCount = 0; 
                 currentMap.forEach((seatType, i) => {
                     const row = Math.floor(i / cols) + 1;
                     const col = (i % cols) + 1;
@@ -420,17 +467,20 @@
                     seatElement.setAttribute('data-id', seatId);
 
                     if (seatType === 'A') {
+                        seatCount++; 
                         seatElement.classList.add('available');
-                        seatElement.textContent = `A${col}`;
+                        seatElement.textContent = `${letterFromZone(currentZone)}${seatCount}`;
                         seatElement.addEventListener('click', () => handleSeatSelection(seatElement, seatId));
                     } else if (seatType === 'B') {
                         seatElement.classList.add('booked');
-                        seatElement.textContent = `B${col}`;
+                        seatElement.textContent = 'Booked';
                     } else if (seatType === 'T') {
                         seatElement.classList.add('table');
                         seatElement.textContent = 'Table';
+                    } else if (seatType === 'E') {
+                        seatElement.style.visibility = 'hidden';
+                        seatElement.style.pointerEvents = 'none';
                     } else {
-                        seatElement.textContent = '';
                         seatElement.style.backgroundColor = 'transparent';
                         seatElement.style.border = 'none';
                     }
@@ -438,161 +488,213 @@
                 });
             }
 
-            function handleSeatSelection(element, seatId) {
-                // If there's an active error, prevent selection
-                if (timeError.style.display === 'block' && timeError.textContent !== "Please click Filter to check validity and availability.") {
-                    return; 
-                }
-                
-                if (selectedSeat) selectedSeat.classList.remove('selected');
-                
-                if (selectedSeat === element) {
-                    selectedSeat = null;
-                    summary.style.display = 'none';
-                } else {
-                    selectedSeat = element;
-                    selectedSeat.classList.add('selected');
-                    selectedSeatLabel.textContent = seatId;
-                    
-                    // Show summary only if valid times are selected
-                    if (fromTimeInput.value && toTimeInput.value) {
-                        summary.style.display = 'flex';
-                    }
-                }
+            function letterFromZone(zone) {
+                return zone === 'zone1' ? 'A' : zone === 'zone2' ? 'B' : zone === 'zone3' ? 'C' : 'D';
             }
 
-            // --- Validation Logic (Triggered by Filter button) ---
+            // --- Seat Selection Logic ---
+            function handleSeatSelection(element, seatId) {
+                const summary = document.getElementById('booking-summary');
+                const selectedSeatLabel = document.getElementById('selected-seat-label');
+                const selectedTime = document.getElementById('selected-time');
+                const fromTimeInput = document.getElementById('from-time');
+                const toTimeInput = document.getElementById('to-time');
+                const bookSeatBtn = document.getElementById('book-seat-btn');
+
+                // Unselect previously selected seat
+                if (selectedSeat && selectedSeat !== element) {
+                    selectedSeat.classList.remove('selected');
+                }
+
+                // Toggle selection
+                if (selectedSeat === element) {
+                    element.classList.remove('selected');
+                    selectedSeat = null;
+                    summary.style.display = 'none';
+                    bookSeatBtn.style.display = 'none';
+                    return;
+                }
+
+                selectedSeat = element;
+                selectedSeat.classList.add('selected');
+                selectedSeatLabel.textContent = seatId;
+                summary.style.display = 'block';
+
+                // Only show book button if time selected
+                if (fromTimeInput.value && toTimeInput.value) {
+                    selectedTime.textContent =
+                        fromTimeInput.options[fromTimeInput.selectedIndex].textContent +
+                        " - " +
+                        toTimeInput.options[toTimeInput.selectedIndex].textContent;
+                    bookSeatBtn.style.display = 'inline-block';
+                } else {
+                    selectedTime.textContent = "Select time first.";
+                    bookSeatBtn.style.display = 'none';
+                }
+
+                // When the user clicks Book Seat
+                bookSeatBtn.onclick = async () => {
+                    const zone = document.getElementById('zone-select').value;
+                    const date = document.getElementById('date-select').value;
+                    const startTime = fromTimeInput.value;
+                    const endTime = toTimeInput.value;
+
+                    if (!startTime || !endTime) {
+                        alert("Please select valid start and end times.");
+                        return;
+                    }
+
+                    const payload = {
+                        seat_id: seatId,
+                        date: date,
+                        start_time: startTime,
+                        end_time: endTime,
+                        zone: zone
+                    };
+
+                    try {
+                        // disable button while booking
+                        bookSeatBtn.disabled = true;
+                        bookSeatBtn.textContent = 'Booking...';
+
+                        const res = await fetch('/api/book-seat', {
+                            method: 'POST',
+                            credentials: 'same-origin',             // <<--- IMPORTANT: send session cookie
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const data = await res.json().catch(() => ({}));
+
+                        if (res.ok) {
+                            alert(data.message || "Seat booked successfully!");
+                            element.classList.remove('available');
+                            element.classList.add('booked');
+                            element.textContent = 'Booked';
+                            element.style.backgroundColor = '#ff4d4d';
+                            element.style.color = 'white';
+                            bookSeatBtn.style.display = 'none';
+                            summary.style.display = 'none';
+                        } else if (res.status === 401) {
+                            alert("You must be logged in to book a seat. Please log in and try again.");
+                        } else {
+                            alert(data.message || `Booking failed (status ${res.status}).`);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error connecting to server. Check console for details.");
+                    } finally {
+                        bookSeatBtn.disabled = false;
+                        bookSeatBtn.textContent = 'Book Seat';
+                    }
+                };
+
+            }
+
+
+            // --- Filter Button Logic ---
             filterBtn.addEventListener('click', () => {
-                // Reset states
                 timeError.style.display = 'none';
                 selectedSeat = null;
                 summary.style.display = 'none';
-                
-                // Clear all seat selections on map
                 document.querySelectorAll('.seat.selected').forEach(s => s.classList.remove('selected'));
 
                 const from = fromTimeInput.value;
                 const to = toTimeInput.value;
-                
                 if (!from || !to) {
                     timeError.textContent = "Please select both a Start Time and an End Time.";
                     timeError.style.display = 'block';
                     return;
                 }
 
-                // Use a dummy date to correctly calculate time difference.
-                // The '24:00' value for 'to' will be correctly parsed as midnight of the next day.
-                // Handle '24:00' explicitly since Date parsing doesn't accept '24:00'.
-                function parseTimeToDate(t) {
-                    if (t === '24:00') {
-                        // represent as next day midnight
-                        return new Date('1970-01-02T00:00:00');
-                    }
-                    return new Date(`1970-01-01T${t}:00`);
-                }
-
-                const fromDate = parseTimeToDate(from);
-                const toDate = parseTimeToDate(to);
-                
-                const diffMinutes = (toDate.getTime() - fromDate.getTime()) / (1000 * 60);
+                const fromDate = parseTime(from);
+                const toDate = parseTime(to);
+                const diffMinutes = (toDate - fromDate) / (1000 * 60);
 
                 if (diffMinutes <= 0) {
-                    timeError.textContent = "Error: End time must be after the start time.";
+                    timeError.textContent = "End time must be after the start time.";
+                    timeError.style.display = 'block';
+                    return;
+                }
+                if (diffMinutes < MIN_DURATION_MINUTES || diffMinutes > MAX_DURATION_MINUTES) {
+                    timeError.textContent = `Invalid slot. Minimum booking is 1 hour, maximum is 3 hours. (You selected ${diffMinutes/60} hrs)`;
                     timeError.style.display = 'block';
                     return;
                 }
 
-                if (diffMinutes < MIN_DURATION_MINUTES || diffMinutes > MAX_DURATION_MINUTES) {
-                    timeError.textContent = `Invalid slot. Minimum booking is 1 hour, maximum is 3 hours. (Current duration: ${diffMinutes / 60} hours)`;
-                    timeError.style.display = 'block';
-                    return;
-                }
-                
-                // --- Validation Passed ---
-                
-                // Update time display using the nicely formatted text from the options
                 const fromDisplay = fromTimeInput.options[fromTimeInput.selectedIndex].textContent;
                 const toDisplay = toTimeInput.options[toTimeInput.selectedIndex].textContent;
                 selectedTime.textContent = `${fromDisplay} - ${toDisplay}`;
 
-                // Simulate filtering/refreshing the map based on valid time/zone
                 regenerateMap();
-                
-                // Clear generic hint
                 timeError.style.display = 'none';
             });
-            
-            // Initial setup on load
-            generateTimeOptions();
-            regenerateMap(); // Initial map display
-            
+
+            function parseTime(t) {
+                if (t === '24:00') return new Date('1970-01-02T00:00:00');
+                return new Date(`1970-01-01T${t}:00`);
+            }
+
+            // --- Zone Change Logic ---
             zoneSelect.addEventListener('change', () => {
-                // Suggest filtering after change
                 timeError.textContent = "Please click Filter to check validity and availability.";
                 timeError.style.display = 'block';
-                // Clear map until filter is hit (but keep title updated for clarity)
-                mapContainer.innerHTML = ''; 
-                zoneTitle.textContent = zoneSelect.options[zoneSelect.selectedIndex].textContent;
+                mapContainer.innerHTML = '';
+                regenerateMap(zoneSelect.value);
             });
-            
-            // Initial hint
-            timeError.textContent = "Please select your time slot and click Filter.";
 
-            // --- Confirm Booking: call Flask API ---
-            confirmBookingBtn.addEventListener('click', async () => {
-                if (!selectedSeatLabel.textContent) {
-                    alert('Please select a seat first.');
-                    return;
-                }
-                if (!fromTimeInput.value || !toTimeInput.value) {
-                    alert('Please select valid start and end times and click Filter.');
-                    return;
-                }
-
-                // Build payload
-                const seatId = selectedSeatLabel.textContent;
-                const dateVal = dateSelect.value; // expects YYYY-MM-DD
-                const startTimeRaw = fromTimeInput.value;
-                const endTimeRaw = toTimeInput.value;
-
-                // Convert display times if needed (we send raw values)
-                const payload = {
-                    user_id: 1, // TODO: replace with actual logged-in user id (from session)
-                    seat_id: seatId,
-                    date: dateVal,
-                    start_time: startTimeRaw,
-                    end_time: endTimeRaw
-                };
-
-                try {
-                    const res = await fetch('/api/book-seat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        alert(data.message || 'Booking successful!');
-                        // Optionally refresh map or mark seat as booked visually
-                        // find selected seat element and mark as booked
-                        if (selectedSeat) {
-                            selectedSeat.classList.remove('selected');
-                            selectedSeat.classList.remove('available');
-                            selectedSeat.classList.add('booked');
-                            selectedSeat.textContent = 'B';
-                        }
-                        summary.style.display = 'none';
-                    } else {
-                        alert(data.message || 'Booking failed. See console for details.');
-                        console.error('Booking response:', data);
+            // --- Confirm Booking API ---// --- Confirm Booking API (if you have a separate confirm button) ---
+            if (confirmBookingBtn) {
+                confirmBookingBtn.addEventListener('click', async () => {
+                    if (!selectedSeatLabel.textContent) {
+                        alert('Please select a seat first.');
+                        return;
                     }
-                } catch (err) {
-                    console.error('Booking error', err);
-                    alert('Network error while booking. Please try again.');
-                }
-            });
+                    if (!fromTimeInput.value || !toTimeInput.value) {
+                        alert('Please select valid start and end times and click Filter.');
+                        return;
+                    }
 
+                    const payload = {
+                        seat_id: selectedSeatLabel.textContent,
+                        date: dateSelect.value,
+                        start_time: fromTimeInput.value,
+                        end_time: toTimeInput.value
+                    };
+
+                    try {
+                        const res = await fetch('/api/book-seat', {
+                            method: 'POST',
+                            credentials: 'same-origin',               // <<--- IMPORTANT
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (res.ok) {
+                            alert(data.message || 'Booking successful!');
+                            if (selectedSeat) {
+                                selectedSeat.classList.remove('available');
+                                selectedSeat.classList.add('booked');
+                                selectedSeat.textContent = 'Booked';
+                            }
+                            summary.style.display = 'none';
+                        } else if (res.status === 401) {
+                            alert("You must be logged in to book a seat.");
+                        } else {
+                            alert(data.message || `Booking failed (status ${res.status}).`);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Network error while booking.');
+                    }
+                });
+            }
+
+            // --- Initialization ---
+            generateTimeOptions();
+            regenerateMap('zone1');
         });
     </script>
+
 </body>
 </html>
