@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify OTP - QuietQueue</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #007f82;
+      --card-bg: #ffffff;
+      --background-color: #f8fafc;
+    }
+
+    body.verify-page {
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: var(--background-color);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .cat-wall {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 130px;
+      background-color: #b44b32;
+      background-image:
+        linear-gradient(135deg, rgba(255, 225, 160, 0.35) 0%, rgba(255, 200, 120, 0.15) 30%, rgba(0, 0, 0, 0.05) 100%),
+        linear-gradient(90deg, #c9b9a6 2px, transparent 2px),
+        linear-gradient(0deg, #c9b9a6 2px, transparent 2px),
+        linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.25) 100%);
+      background-size: 100% 100%, 60px 30px, 120px 60px, 100% 100%;
+      border-top: 5px solid #a23e2a;
+      box-shadow: 0 -6px 10px rgba(0,0,0,0.2) inset;
+      z-index: 1;
+    }
+
+    .cat-wrapper {
+      position: absolute;
+      bottom: 130px;
+      left: calc(50% - 450px);
+      width: 160px;
+      height: 180px;
+      z-index: 5;
+    }
+
+    .cat { position: relative; width: 100%; height: 100%; }
+    .cat-head {
+      position: absolute; width: 120px; height: 100px;
+      left: 20px; top: 0;
+      background: #f2cdaa; border-radius: 70px 70px 60px 60px;
+      box-shadow: inset 0 0 0 4px #e4b98d;
+      z-index: 3;
+    }
+    .cat-body {
+      position: absolute; top: 80px; left: 25px;
+      width: 110px; height: 80px;
+      background: #f2cdaa; border-radius: 55px 55px 20px 20px;
+      box-shadow: inset 0 0 0 4px #e4b98d, 0 5px 10px rgba(0,0,0,0.1);
+    }
+    .cat-ear {
+      position: absolute; width: 0; height: 0;
+      border-left: 25px solid transparent;
+      border-right: 25px solid transparent;
+      border-bottom: 35px solid #f2cdaa;
+    }
+    .cat-ear.left { top: -15px; left: 15px; transform: rotate(-15deg); }
+    .cat-ear.right { top: -15px; right: 15px; transform: rotate(15deg); }
+    .cat-eye {
+      position: absolute; width: 25px; height: 25px;
+      background: white; border-radius: 50%; overflow: hidden;
+      animation: blink 4s infinite;
+    }
+    .cat-eye.left { top: 45px; left: 40px; }
+    .cat-eye.right { top: 45px; right: 40px; }
+    @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+    .pupil {
+      position: absolute; width: 10px; height: 10px;
+      background: black; border-radius: 50%;
+      top: 7px; left: 7px;
+      transition: transform 0.1s ease-out;
+    }
+    .cat-nose {
+      position: absolute; width: 14px; height: 10px;
+      background: #e0927f; top: 67px; left: 50%;
+      transform: translateX(-50%); border-radius: 8px;
+    }
+    .cat-mouth {
+      position: absolute; top: 75px; left: 50%;
+      width: 30px; height: 20px;
+      border-bottom: 3px solid #e0927f;
+      border-radius: 0 0 30px 30px;
+      transform: translateX(-50%);
+    }
+    .cat-paws {
+      position: absolute; bottom: -5px; left: 50%;
+      width: 100px; height: 20px; display: flex; justify-content: space-between;
+      transform: translateX(-50%);
+    }
+    .cat-paws div {
+      width: 25px; height: 15px; background: #f2cdaa;
+      border-radius: 8px; border: 2px solid #e4b98d;
+    }
+
+    .otp-card {
+      position: relative;
+      background: var(--card-bg);
+      padding: 40px 35px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      width: 380px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .otp-card h2 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .otp-card p {
+      color: #555;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+    }
+
+    .otp-card input[type="text"] {
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 3px;
+      width: 100%;
+    }
+
+    .otp-card button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      transition: 0.3s ease;
+    }
+
+    .otp-card button:hover {
+      background: #009da0;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+    .otp-card a {
+      display: inline-block;
+      margin-top: 15px;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .otp-card a:hover {
+      text-decoration: underline;
+    }
+
+    .flash-messages {
+      margin-top: 10px;
+      color: #d32f2f;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+
+<body class="verify-page">
+  <div class="cat-wall"></div>
+  
+  <div class="cat-wrapper">
+    <div class="cat">
+      <div class="cat-ear left"></div>
+      <div class="cat-ear right"></div>
+      <div class="cat-body"></div>
+      <div class="cat-head">
+        <div class="cat-eye left"><div class="pupil"></div></div>
+        <div class="cat-eye right"><div class="pupil"></div></div>
+        <div class="cat-nose"></div>
+        <div class="cat-mouth"></div>
+      </div>
+      <div class="cat-paws"><div></div><div></div></div>
+    </div>
+  </div>
+
+  <div class="otp-card">
+    <i class="fa-solid fa-shield-halved fa-3x" style="color:#007f82;"></i>
+    <h2>Verify OTP</h2>
+    <p>Enter the 6-digit OTP sent to your email.</p>
+
+    <form method="POST" action="{{ url_for('verify_otp') }}">
+      <input type="text" name="otp" id="otp" placeholder="______" maxlength="6" required>
+      <button type="submit">Verify OTP</button>
+    </form>
+
+    <p id="timer" style="color:#555; font-size:14px; margin-top:10px;">OTP expires in 5:00</p>
+    <script>
+      let timeLeft = 300;
+      const timerEl = document.getElementById('timer');
+      const timer = setInterval(() => {
+        let min = Math.floor(timeLeft / 60);
+        let sec = timeLeft % 60;
+        timerEl.textContent = `OTP expires in ${min}:${sec.toString().padStart(2, '0')}`;
+        timeLeft--;
+        if (timeLeft < 0) {
+          clearInterval(timer);
+          timerEl.textContent = "OTP expired. Please request a new one.";
+        }
+      }, 1000);
+    </script>
+
+    <div class="flash-messages">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for msg in messages %}
+            <div>{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <a href="{{ url_for('forgot_password') }}"><i class="fa-solid fa-arrow-left"></i> Re-enter Email</a>
+  </div>
+
+  <script>
+    const pupils = document.querySelectorAll('.pupil');
+    document.addEventListener('mousemove', e => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 12;
+      const y = (e.clientY / window.innerHeight - 0.5) * 12;
+      pupils.forEach(p => p.style.transform = `translate(${x}px, ${y}px)`);
+    });
+
+    const otpInput = document.getElementById("otp");
+    otpInput.addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, "");
+    });
+  </script>
+</body>
+</html>

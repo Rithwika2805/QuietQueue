@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Books | QuietQueue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary-color: #009da0;
+      --secondary-color: #0f172a;
+      --text-color: #111827;
+      --bg-light: #f9fafb;
+      --card-bg: #fff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Inter", sans-serif;
+    }
+
+    body {
+      background: var(--bg-light);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--secondary-color);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .sidebar .logo {
+      font-size: 1.3em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid white;
+      margin-bottom: 20px;
+    }
+
+    .sidebar .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      text-decoration: none;
+      padding: 12px 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+
+    .sidebar .nav a:hover,
+    .sidebar .nav a.active {
+      background: var(--primary-color);
+    }
+
+    .nav a i {
+            width: 20px;
+            text-align: center;
+    }
+
+    .main {
+      margin-left: 260px;
+      padding: 30px;
+      flex: 1;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--bg-light);
+      padding-bottom: 15px;
+    }
+
+    .sticky-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--secondary-color);
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 10px;
+      padding: 10px 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .search-bar i {
+      color: var(--primary-color);
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      color: var(--text-color);
+      background: transparent;
+    }
+
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 25px;
+      align-items: start;
+      margin-top: 20px;
+    }
+
+    .book-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .book-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      padding: 15px 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .book-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .book-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .book-icon {
+      background: #e6f7f8;
+      color: var(--primary-color);
+      font-size: 22px;
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .book-info h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .book-info p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .book-right p {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .filters-panel {
+      background: linear-gradient(145deg, #ffffff 0%, #f0fbfb 100%);
+      border-left: 5px solid var(--primary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 157, 160, 0.15);
+      padding: 20px;
+      position: sticky;
+      top: 120px;
+      transition: all 0.2s ease;
+    }
+
+    .filters-panel:hover {
+      box-shadow: 0 6px 20px rgba(0, 157, 160, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .filters-panel h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--secondary-color);
+    }
+
+    .filter-group {
+      margin-bottom: 15px;
+    }
+
+    .filter-options label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      position: relative;
+      padding-left: 25px;
+      color: #333;
+    }
+
+    .filter-options input[type="checkbox"] {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.8em;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .sidebar-footer p {
+       margin: 0;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 900px) {
+      .content-wrapper {
+        grid-template-columns: 1fr;
+      }
+      .filters-panel {
+        position: relative;
+        top: 0;
+      }
+      .sticky-header {
+        position: relative;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-book-open"></i> QuietQueue
+    </div>
+    <nav class="nav">
+      <a href="{{ url_for('student_dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="{{ url_for('seat_layout') }}"><i class="fa-solid fa-chair"></i> Book Seats</a>
+      <a href="{{ url_for('history') }}"><i class="fa-solid fa-clock-rotate-left"></i> Your Bookings</a>
+      <a href="{{ url_for('book_search') }}" class="active"><i class="fa-solid fa-magnifying-glass"></i> Search Books</a>
+      <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="{{ url_for('contact') }}"><i class="fa-solid fa-envelope"></i> Contact Us</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>© 2025 QuietQueue</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="sticky-header">
+      <h1 style="color: #009DA0;">Search Books</h1>
+      <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN..." />
+      </div>
+    </div>
+
+    {% if books %}
+    <div class="content-wrapper">
+      <div class="book-list" id="bookList">
+        {% for book in books %}
+        <div class="book-item" data-category="{{ book.category|lower }}">
+          <div class="book-left">
+            <div class="book-icon"><i class="fa-solid fa-book"></i></div>
+            <div class="book-info">
+              <h3>{{ book.title }}</h3>
+              <p>ISBN# {{ book.isbn }} | By {{ book.author }}</p>
+            </div>
+          </div>
+          <div class="book-right">
+            <p>{{ book.category }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="filters-panel">
+        <h3>Filter by Category</h3>
+        <div class="filter-options">
+          <label><input type="checkbox" name="category" value="it"> IT</label>
+          <label><input type="checkbox" name="category" value="ece"> ECE</label>
+          <label><input type="checkbox" name="category" value="it-bi"> IT-BI</label>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <p>No books found.</p>
+    {% endif %}
+  </main>
+
+  <script>
+    const searchInput = document.getElementById("searchInput");
+    const checkboxes = document.querySelectorAll('input[name="category"]');
+    const books = document.querySelectorAll(".book-item");
+
+    function filterBooks() {
+      const query = searchInput.value.toLowerCase().trim();
+      const selectedCategories = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value.toLowerCase());
+
+      books.forEach(book => {
+        const title = book.querySelector(".book-info h3").innerText.toLowerCase();
+        const author = book.querySelector(".book-info p").innerText.toLowerCase();
+        const isbn = book.innerText.toLowerCase();
+        const category = book.dataset.category.toLowerCase();
+
+        const matchesSearch =
+          !query || title.includes(query) || author.includes(query) || isbn.includes(query);
+        const matchesCategory =
+          selectedCategories.length === 0 || selectedCategories.includes(category);
+
+        book.style.display = matchesSearch && matchesCategory ? "flex" : "none";
+      });
+    }
+
+    searchInput.addEventListener("input", filterBooks);
+    checkboxes.forEach(cb => cb.addEventListener("change", filterBooks));
+  </script>
+</body>
+</html>

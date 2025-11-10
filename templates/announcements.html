@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Announcements | QuietQueue</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary-color: #009DA0;
+      --secondary-color: #0f172a;
+      --text-color: #111827;
+      --bg-light: #f9fafb;
+      --card-bg: #fff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+
+    body {
+      background: var(--bg-light);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+    }
+    .sidebar .logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 15px;
+      color: white;
+      font-size: 1.3em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar .nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 12px 10px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+      transition: background 0.2s;
+    }
+    .sidebar .nav a:hover,
+    .sidebar .nav a.active { background: var(--primary-color); }
+    .nav a i { margin-right: 15px; width: 20px; }
+
+    .main {
+      margin-left: 280px;
+      flex: 1;
+      padding: 30px;
+    }
+    h1 { font-size: 24px; font-weight: 600; margin-bottom: 25px; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    .add-section input,
+    .add-section textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    .add-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .add-btn:hover { background-color: #00858a; transform: translateY(-2px); }
+
+    .announcement {
+      border-left: 5px solid var(--primary-color);
+      padding: 15px;
+      margin-bottom: 20px;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      position: relative;
+    }
+    .announcement h3 { margin: 0 0 8px; color: #333; }
+    .announcement p { margin: 5px 0; color: #555; }
+    .date { font-size: 0.85em; color: #888; }
+    .posted-by { font-size: 0.9em; color: #555; font-style: italic; }
+    .delete-btn {
+      position: absolute; top: 10px; right: 10px;
+      background-color: #e53935; color: white;
+      border: none; padding: 5px 8px;
+      border-radius: 5px; cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 2000;
+    }
+    .modal.show { opacity: 1; pointer-events: auto; }
+    .modal-content {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      transform: scale(0.9);
+      transition: transform 0.25s ease;
+    }
+    .modal.show .modal-content { transform: scale(1); }
+    .modal-content h3 {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--secondary-color);
+    }
+    .modal-content input,
+    .modal-content textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 15px;
+    }
+    .modal-content button {
+      width: 100%;
+      padding: 10px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+    .modal-content .close-btn { background-color: #ccc; color: #111; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.8em;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .sidebar-footer p {
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -40%);
+      background: #111827;
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 2500;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, -50%); }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="logo"><i class="fa-solid fa-book-open"></i> QuietQueue</div>
+    <nav class="nav">
+      <a href="/dashboard-admin"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="/manage-books"><i class="fa-solid fa-book"></i> Manage Books</a>
+      <a href="/manage-users"><i class="fa-solid fa-users"></i> Manage Users</a>
+      <a href="/announcements" class="active"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+      <a href="/admin-profile"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>© 2025 QuietQueue</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1 style="color: #009DA0;">Announcements</h1>
+
+    <div class="card add-section">
+      <button type="button" class="add-btn" onclick="openAddModal()">+ Add Announcement</button>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom: 15px;">Recent Announcements</h2>
+      <div id="announcementList">
+        {% for ann in announcements %}
+        <div class="announcement">
+          <button type="button" class="delete-btn" onclick="openDeleteModal('{{ ann.id }}', '{{ ann.title|e }}')">×</button>
+          <h3>{{ ann.title }}</h3>
+          <p>{{ ann.message }}</p>
+          <p class="posted-by">Posted by <strong>{{ ann.created_by }}</strong></p>
+          <p class="date">📅 {{ ann.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+        </div>
+        {% else %}
+        <p>No announcements yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Announcement Modal -->
+  <div class="modal" id="addModal">
+    <div class="modal-content">
+      <h3>Add Announcement</h3>
+      <input type="text" id="ann_title" placeholder="Title">
+      <textarea id="ann_message" rows="4" placeholder="Announcement message..."></textarea>
+      <button type="button" id="addConfirmBtn" onclick="addAnnouncement()">Add</button>
+      <button type="button" class="close-btn" onclick="closeAddModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <h3>Confirm Deletion</h3>
+      <div id="deleteModalBody" style="margin:10px 0; color:#374151;"></div>
+      <button type="button" id="confirmDeleteBtn" onclick="confirmDelete()">Confirm Delete</button>
+      <button type="button" class="close-btn" onclick="closeDeleteModal()">Back</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let deleteId = null;
+
+    function openAddModal() {
+      document.getElementById("ann_title").value = "";
+      document.getElementById("ann_message").value = "";
+      document.getElementById("addModal").classList.add("show");
+      document.getElementById("addConfirmBtn").disabled = false;
+      document.getElementById("addConfirmBtn").textContent = "Add";
+    }
+    function closeAddModal() {
+      document.getElementById("addModal").classList.remove("show");
+    }
+
+    function openDeleteModal(id, title) {
+      deleteId = id;
+      document.getElementById("deleteModalBody").innerHTML = `
+        <p><strong>Title:</strong> ${title}</p>
+        <p style="margin-top:10px;">Are you sure you want to delete this announcement?</p>
+      `;
+      document.getElementById("deleteModal").classList.add("show");
+    }
+
+    function closeDeleteModal() {
+      document.getElementById("deleteModal").classList.remove("show");
+      deleteId = null;
+    }
+
+    function showToast(message, duration = 2500) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), duration);
+    }
+
+    async function addAnnouncement() {
+      const title = document.getElementById("ann_title").value.trim();
+      const message = document.getElementById("ann_message").value.trim();
+      const btn = document.getElementById("addConfirmBtn");
+
+      if (!title || !message) {
+        showToast("Please fill in all fields.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Adding...";
+
+      try {
+        const res = await fetch("/api/add-announcement", {
+          method: "POST",
+          credentials: "same-origin",   // ensure session cookie (admin) is included
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, message })
+        });
+
+        let data;
+        try { data = await res.json(); } catch (e) { data = null; }
+
+        if (!res.ok) {
+          const errMsg = (data && data.message) ? data.message : `Server error (${res.status})`;
+          console.error("Add announcement failed:", res.status, data);
+          showToast(errMsg);
+          btn.disabled = false;
+          btn.textContent = "Add";
+          return;
+        }
+
+        showToast((data && data.message) ? data.message : "Announcement added!");
+        closeAddModal();
+
+        setTimeout(() => location.reload(), 900);
+
+      } catch (err) {
+        console.error("Network or JS error adding announcement:", err);
+        showToast("Network error. Check console.");
+        btn.disabled = false;
+        btn.textContent = "Add";
+      }
+    }
+
+    async function confirmDelete() {
+      if (!deleteId) return;
+      const btn = document.getElementById("confirmDeleteBtn");
+      btn.disabled = true;
+      btn.textContent = "Deleting...";
+
+      try {
+        const res = await fetch(`/api/delete-announcement/${deleteId}`, {
+          method: "DELETE",
+          credentials: "same-origin",
+        });
+
+        let data;
+        try { data = await res.json(); } catch (e) { data = null; }
+
+        if (!res.ok) {
+          const errMsg = (data && data.message) ? data.message : `Server error (${res.status})`;
+          console.error("Delete failed:", res.status, data);
+          showToast(errMsg);
+          btn.disabled = false;
+          btn.textContent = "Confirm Delete";
+          return;
+        }
+
+        showToast((data && data.message) ? data.message : "Deleted!");
+        closeDeleteModal();
+        setTimeout(() => location.reload(), 900);
+      } catch (err) {
+        console.error("Network error deleting announcement:", err);
+        showToast("Network error. Check console.");
+        btn.disabled = false;
+        btn.textContent = "Confirm Delete";
+      }
+    }
+
+    window.onclick = e => {
+      if (e.target === document.getElementById("addModal")) closeAddModal();
+      if (e.target === document.getElementById("deleteModal")) closeDeleteModal();
+    };
+  </script>
+</body>
+</html>

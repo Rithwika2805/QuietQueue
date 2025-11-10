@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - QuietQueue</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary-color: #007f82;
+      --card-bg: #ffffff;
+      --background-color: #f8fafc;
+    }
+
+    body.register-page {
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: var(--background-color);
+      overflow: hidden; 
+      position: relative;
+    }
+
+    .cat-wall {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 130px;
+      background-color: #b44b32;
+      background-image:
+        linear-gradient(135deg, rgba(255, 225, 160, 0.35) 0%, rgba(255, 200, 120, 0.15) 30%, rgba(0, 0, 0, 0.05) 100%),
+        linear-gradient(90deg, #c9b9a6 2px, transparent 2px),
+        linear-gradient(0deg, #c9b9a6 2px, transparent 2px),
+        linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.25) 100%);
+      background-size: 100% 100%, 60px 30px, 120px 60px, 100% 100%;
+      border-top: 5px solid #a23e2a;
+      box-shadow: 0 -6px 10px rgba(0,0,0,0.2) inset;
+      z-index: 1;
+    }
+
+    .cat-wrapper {
+      position: absolute;
+      bottom: 130px;
+      left: calc(50% - 450px); 
+      width: 160px;
+      height: 180px;
+      z-index: 5;
+      transition: transform 0.5s ease;
+    }
+
+    .cat {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.4s ease;
+    }
+
+    .register-card:hover ~ .cat-wrapper .cat {
+      transform: rotate(-6deg);
+    }
+
+    .cat-head {
+      position: absolute;
+      width: 120px;
+      height: 100px;
+      left: 20px;
+      top: 0;
+      background: #f2cdaa;
+      border-radius: 70px 70px 60px 60px;
+      box-shadow: inset 0 0 0 4px #e4b98d;
+      transform-origin: center bottom;
+      transition: transform 0.4s ease;
+      z-index: 3;
+    }
+
+    .register-card:hover ~ .cat-wrapper .cat-head {
+      transform: rotate(-4deg);
+    }
+
+    .cat-body {
+      position: absolute;
+      top: 80px;
+      left: 25px;
+      width: 110px;
+      height: 80px;
+      background: #f2cdaa;
+      border-radius: 55px 55px 20px 20px;
+      box-shadow: inset 0 0 0 4px #e4b98d, 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cat-body::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%);
+      pointer-events: none;
+    }
+
+    .cat-ear {
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-left: 25px solid transparent;
+      border-right: 25px solid transparent;
+      border-bottom: 35px solid #f2cdaa;
+    }
+
+    .cat-ear.left { top: -15px; left: 15px; transform: rotate(-15deg); }
+    .cat-ear.right { top: -15px; right: 15px; transform: rotate(15deg); }
+
+    .cat-eye {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: white;
+      border-radius: 50%;
+      overflow: hidden;
+      animation: blink 4s infinite;
+    }
+
+    .cat-eye.left { top: 45px; left: 40px; }
+    .cat-eye.right { top: 45px; right: 40px; }
+
+    @keyframes blink {
+      0%, 90%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+
+    .pupil {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: black;
+      border-radius: 50%;
+      top: 7px;
+      left: 7px;
+      transition: transform 0.1s ease-out;
+    }
+
+    .cat-nose {
+      position: absolute;
+      width: 14px;
+      height: 10px;
+      background: #e0927f;
+      top: 67px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 8px;
+    }
+
+    .cat-mouth {
+      position: absolute;
+      top: 75px;
+      left: 50%;
+      width: 30px;
+      height: 20px;
+      border-bottom: 3px solid #e0927f;
+      border-radius: 0 0 30px 30px;
+      transform: translateX(-50%);
+    }
+
+    .cat-paws {
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      width: 100px;
+      height: 20px;
+      display: flex;
+      justify-content: space-between;
+      transform: translateX(-50%);
+    }
+
+    .cat-paws div {
+      width: 25px;
+      height: 15px;
+      background: #f2cdaa;
+      border-radius: 8px;
+      border: 2px solid #e4b98d;
+    }
+
+    @keyframes wave {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-20deg); }
+    }
+
+    .register-card:hover ~ .cat-wrapper .cat-paws div:first-child {
+      animation: wave 0.8s ease-in-out infinite;
+    }
+
+    .register-card {
+      position: relative;
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      width: 450px;
+      text-align: center;
+      z-index: 10;
+      transition: transform 0.3s ease;
+    }
+
+    .register-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .register-card h2 {
+      margin-bottom: 30px;
+      font-size: 1.8em;
+      color: var(--primary-color);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      background-color: white;
+      box-sizing: border-box;
+    }
+
+    .btn-register-submit {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1em;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-register-submit:hover {
+      background-color: #009da0;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+    .footer-links {
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+
+    .footer-links a {
+      color: var(--primary-color);
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    .flash {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: #e6ffed;
+      color: #055160;
+      border: 1px solid #b3e0c2;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="register-page">
+
+  <div class="cat-wall"></div>
+
+  <div class="cat-wrapper" id="cat">
+    <div class="cat">
+      <div class="cat-ear left"></div>
+      <div class="cat-ear right"></div>
+      <div class="cat-body"></div>
+      <div class="cat-head">
+        <div class="cat-eye left"><div class="pupil"></div></div>
+        <div class="cat-eye right"><div class="pupil"></div></div>
+        <div class="cat-nose"></div>
+        <div class="cat-mouth"></div>
+      </div>
+      <div class="cat-paws"><div></div><div></div></div>
+    </div>
+  </div>
+
+  <div class="register-card">
+    <h2>Join Our Community</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" name="roll" placeholder="Roll Number" required>
+        </div>
+        <div class="form-group">
+          <input type="text" name="name" placeholder="Full Name" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input type="email" name="email" placeholder="Institution Email Address"
+               pattern="^[a-zA-Z0-9._%+-]+@iiita\\.ac\\.in$"
+               title="Please enter a valid IIITA email (e.g., name@iiita.ac.in)" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <select name="course" required>
+            <option value="" disabled selected>Select Course</option>
+            <option value="B.Tech">B.Tech</option>
+            <option value="M.Tech">M.Tech</option>
+            <option value="MBA">MBA</option>
+            <option value="Ph.D">Ph.D</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <select name="semester" required>
+            <option value="" disabled selected>Select Semester</option>
+            <option value="1">1st Semester</option>
+            <option value="2">2nd Semester</option>
+            <option value="3">3rd Semester</option>
+            <option value="4">4th Semester</option>
+            <option value="5">5th Semester</option>
+            <option value="6">6th Semester</option>
+            <option value="7">7th Semester</option>
+            <option value="8">8th Semester</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="password" placeholder="Create Password" required>
+      </div>
+      <div class="form-group">
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+      </div>
+
+      <button type="submit" class="btn-register-submit">Register Now</button>
+    </form>
+
+    <div class="footer-links">
+      Already have an account? <a href="{{ url_for('login') }}">Login Here</a>
+    </div>
+  </div>
+
+  <script>
+    const pupils = document.querySelectorAll('.pupil');
+    document.addEventListener('mousemove', e => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 12;
+      const y = (e.clientY / window.innerHeight - 0.5) * 12;
+      pupils.forEach(p => p.style.transform = `translate(${x}px, ${y}px)`);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking History - QuietQueue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #009DA0;
+      --secondary-color: #f39c12;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background-color: #f5f7fb;
+      color: var(--text-color);
+    }
+
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .sidebar .logo {
+      font-size: 1.3em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid white;
+      margin-bottom: 20px;
+    }
+
+    .sidebar .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      text-decoration: none;
+      padding: 12px 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+
+    .sidebar .nav a:hover,
+    .sidebar .nav a.active {
+      background: var(--primary-color);
+    }
+
+    .nav a i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      flex-grow: 1;
+      padding: 30px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .user-info {
+      font-weight: 600;
+      font-size: 1.2em;
+    }
+
+    .bell-icon {
+      font-size: 1.3em;
+      color: var(--text-color);
+      cursor: pointer;
+    }
+
+    .history-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 30px;
+    }
+
+    .history-card h2 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    h3 {
+      color: var(--secondary-color);
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.95em;
+    }
+
+    th {
+      color: var(--primary-color);
+      background-color: #f0fafa;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f9fdfd;
+    }
+
+    .no-history {
+      text-align: center;
+      color: #777;
+      font-size: 1em;
+      padding: 20px 0;
+    }
+
+    .btn-back {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+
+    .btn-back:hover {
+      background-color: #007c80;
+    }
+
+    .btn-cancel {
+      background: #dc3545 !important;
+      color: #fff !important;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      text-align: center;
+    }
+
+    .btn-cancel:hover {
+      background: #b92a37 !important;   
+      transform: translateY(-1px);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+    .overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      width: 320px;
+      max-width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      transform: scale(0.9);
+      transition: transform 0.25s ease;
+    }
+    .overlay.show .modal-card {
+      transform: scale(1);
+    }
+    .modal-header {
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    .modal-body .modal-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+    .modal-actions {
+      margin-top: 15px;
+      text-align: right;
+    }
+    .btn-primary {
+      background: #009DA0;
+      border: none;
+      padding: 8px 14px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #aaa;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -40%);
+      background: #111827;
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      font-weight: 500;
+      text-align: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.8em;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .sidebar-footer p {
+       margin: 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-book-open"></i> QuietQueue
+    </div>
+    <nav class="nav">
+      <a href="{{ url_for('student_dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="{{ url_for('seat_layout') }}"><i class="fa-solid fa-chair"></i> Book Seats</a>
+      <a href="{{ url_for('history') }}" class="active"><i class="fa-solid fa-clock-rotate-left"></i> Your Bookings</a>
+      <a href="{{ url_for('book_search') }}"><i class="fa-solid fa-magnifying-glass"></i> Search Books</a>
+      <a href="{{ url_for('profile') }}"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="{{ url_for('contact') }}"><i class="fa-solid fa-envelope"></i> Contact Us</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>© 2025 QuietQueue</p>
+    </div>
+  </aside>
+
+    <main class="main-content">
+      <section class="history-card">
+        <h2 style="color: #009DA0;"><i class="fa-solid fa-clock-rotate-left"></i> Booking History</h2>
+
+        <h3 style="color: var(--primary-color);">Upcoming Bookings</h3>
+        {% if future_bookings and future_bookings|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Seat</th>
+                <th>Zone</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for booking in future_bookings %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ booking.seat_id }}</td>
+                <td>{{ booking.zone }}</td>
+                <td>{{ booking.booking_date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ booking.start_time.strftime('%H:%M') }}</td>
+                <td>{{ booking.end_time.strftime('%H:%M') }}</td>
+                <td style="font-weight:600; color: var(--primary-color);">{{ booking.status|capitalize }}</td>
+                <td>
+                  <button class="btn-cancel" data-booking-id="{{ booking.id }}">Cancel</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="no-history"><i class="fa-solid fa-calendar-xmark"></i> No upcoming bookings.</p>
+        {% endif %}
+
+        <h3>Last 2 Bookings</h3>
+        {% if past_bookings and past_bookings|length > 0 %}
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Seat</th>
+                <th>Zone</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for booking in past_bookings %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ booking.seat_id }}</td>
+                <td>{{ booking.zone }}</td>
+                <td>{{ booking.booking_date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ booking.start_time.strftime('%H:%M') }}</td>
+                <td>{{ booking.end_time.strftime('%H:%M') }}</td>
+                <td style="color: #888;">{{ booking.status|capitalize }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="no-history"><i class="fa-solid fa-inbox"></i> No past bookings found.</p>
+        {% endif %}
+
+        <div style="text-align:center;">
+          <a href="{{ url_for('student_dashboard') }}" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="cancel-modal" class="overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cancel-title">
+      <div class="modal-header" id="cancel-title">Confirm Cancellation</div>
+      <div class="modal-body" id="cancel-modal-body"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancel-cancel-btn">Back</button>
+        <button class="btn-primary" id="cancel-confirm-btn">Confirm Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cancelModal = document.getElementById('cancel-modal');
+      const cancelModalBody = document.getElementById('cancel-modal-body');
+      const cancelConfirmBtn = document.getElementById('cancel-confirm-btn');
+      const cancelCancelBtn = document.getElementById('cancel-cancel-btn');
+      const toast = document.getElementById('toast');
+
+      function showOverlay(el) { el.classList.add('show'); }
+      function hideOverlay(el) { el.classList.remove('show'); }
+
+      function showToast(message, duration = 2800) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), duration - 500);
+      }
+
+      document.querySelectorAll('.btn-cancel').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const bookingId = btn.dataset.bookingId;
+          try {
+            const res = await fetch(`/api/my-booking?booking_id=${bookingId}`, { credentials: 'same-origin' });
+            const data = await res.json();
+
+            const html = `
+              <div class="modal-row"><strong>Seat</strong><span>${data.seat_id || '—'}</span></div>
+              <div class="modal-row"><strong>Zone</strong><span>${data.zone || '—'}</span></div>
+              <div class="modal-row"><strong>Date</strong><span>${data.booking_date || '—'}</span></div>
+              <div class="modal-row"><strong>Time</strong><span>${data.start_time || '—'} — ${data.end_time || '—'}</span></div>
+              <p style="margin-top:10px;color:#374151">Are you sure you want to cancel this booking?</p>
+            `;
+            cancelModalBody.innerHTML = html;
+            cancelConfirmBtn.dataset.bookingId = bookingId;
+            showOverlay(cancelModal);
+          } catch {
+            showToast('Error loading booking details.');
+          }
+        });
+      });
+
+      cancelCancelBtn.addEventListener('click', () => hideOverlay(cancelModal));
+
+      cancelConfirmBtn.addEventListener('click', async () => {
+        const bookingId = cancelConfirmBtn.dataset.bookingId;
+        if (!bookingId) return;
+        cancelConfirmBtn.disabled = true;
+        cancelConfirmBtn.textContent = 'Cancelling...';
+        try {
+          const res = await fetch(`/api/cancel-booking/${bookingId}`, { method: 'POST', credentials: 'same-origin' });
+          const data = await res.json();
+          if (res.ok) {
+            hideOverlay(cancelModal);
+            showToast('Booking cancelled successfully.', 3000);
+            setTimeout(() => location.reload(), 2500);
+          } else {
+            showToast(data.message || 'Cancel failed.');
+          }
+        } catch {
+          showToast('Network error while cancelling.');
+        } finally {
+          cancelConfirmBtn.disabled = false;
+          cancelConfirmBtn.textContent = 'Confirm Cancel';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

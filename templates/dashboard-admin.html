@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seat Check-In Panel | QuietQueue</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #009DA0;
+      --secondary-color: #0f172a;
+      --text-color: #111827;
+      --bg-light: #f9fafb;
+      --card-bg: #fff;
+      --neutral-gray: #6b7280;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: var(--bg-light);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .sidebar .logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 15px;
+      color: white;
+      font-size: 1.3em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar .nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 12px 10px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar .nav a:hover,
+    .sidebar .nav a.active {
+      background: var(--primary-color);
+    }
+
+    .nav a i {
+      margin-right: 15px;
+      width: 20px;
+    }
+
+    .main {
+      margin-left: 280px;
+      padding: 30px;
+      flex: 1;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    .booking-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .booking-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .booking-card b {
+      color: var(--secondary-color);
+    }
+
+    .checkin-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .checkin-btn:hover {
+      background: #00858a;
+    }
+
+    .spinner {
+      display: none;
+      margin: 40px auto;
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid var(--neutral-gray);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111827;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 2000;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .overlay.show { opacity: 1; pointer-events: auto; }
+
+    .modal-card {
+      width: 380px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transform: translateY(8px) scale(0.98);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .overlay.show .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 6px 0;
+      font-size: 0.95rem;
+    }
+
+    .modal-actions {
+      text-align: right;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #aaa;
+      padding: 8px 14px;
+      border-radius: 6px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .announcement-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      border-left: 5px solid var(--primary-color);
+    }
+
+    .announcement-card h3 {
+      margin: 0 0 6px;
+      color: var(--secondary-color);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .announcement-card small {
+      color: var(--neutral-gray);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .announcement-card p {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.8em;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .sidebar-footer p {
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    #announcements-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    #announcements-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #announcements-list::-webkit-scrollbar-thumb {
+      background-color: #d1d5db;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-book-open"></i>
+      QuietQueue
+    </div>
+    <nav class="nav">
+      <a href="/dashboard-admin" class="active"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="/manage-books"><i class="fa-solid fa-book"></i> Manage Books</a>
+      <a href="/manage-users"><i class="fa-solid fa-users"></i> Manage Users</a>
+      <a href="/announcements"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+      <a href="/admin-profile"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>© 2025 QuietQueue</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="welcome-header" style="margin-bottom: 20px;">
+    <h2 style="font-size: 22px; font-weight: 600; color: #009DA0;">
+        Hello, {{ admin.full_name }}
+    </h2>
+    </div>
+
+    <h1 style="color: #009DA0;">Seat Check-In Panel</h1>
+
+    <div class="card">
+      <div style="display:flex; gap:10px; margin-bottom:15px;">
+        <button id="load-seats" class="btn-primary">Load Today's Bookings</button>
+        <button id="manual-checkin-btn" class="btn-primary" style="background:var(--primary-color);">Manual Check-In</button>
+      </div>
+      <div class="spinner" id="spinner"></div>
+      <div id="reserved-list"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:20px; font-weight:600; margin-bottom:15px; color:var(--secondary-color);">
+        📢 Announcements
+      </h2>
+      <div id="announcements-list">
+        <p>Loading announcements...</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="checkin-modal" class="overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="checkin-title">
+      <div class="modal-header">
+        <div class="modal-title" id="checkin-title">Confirm Check-In</div>
+      </div>
+      <div class="modal-body" id="checkin-modal-body"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeCheckInModal()">Back</button>
+        <button class="btn-primary" id="checkin-confirm-btn" onclick="confirmCheckIn()">Confirm Check-In</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="manual-checkin-modal" class="overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div class="modal-title" id="manual-checkin-title">Manual Check-In</div>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <input type="text" id="manual-email" placeholder="Student Email or Roll No"
+                style="padding:8px; border:1px solid #ccc; border-radius:6px;">
+          <select id="manual-zone" onchange="autoAssignSeat()" 
+                  style="padding:8px; border:1px solid #ccc; border-radius:6px;">
+            <option value="">Select Zone</option>
+            <option value="zone1">Zone 1</option>
+            <option value="zone2">Zone 2</option>
+            <option value="zone3">Zone 3</option>
+            <option value="zone4">Zone 4</option>
+          </select>
+          <input type="text" id="manual-seat" placeholder="Auto-assigned seat"
+                readonly style="padding:8px; border:1px solid #ccc; border-radius:6px; background:#f3f4f6;">
+        </div>
+        <p style="margin-top:10px;color:#374151;font-size:0.9rem;">
+          Selecting a zone will automatically assign an available seat for immediate check-in.
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeManualCheckIn()">Cancel</button>
+        <button class="btn-primary" id="manual-checkin-confirm" onclick="confirmManualCheckIn()">Confirm Check-In</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="checkout-modal" class="overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+      <div class="modal-header">
+        <div class="modal-title" id="checkout-title">Confirm Check-Out</div>
+      </div>
+      <div class="modal-body" id="checkout-modal-body">
+        <p style="color:#374151;margin-bottom:10px;">Are you sure you want to check this student out?</p>
+        <small style="color:#6b7280;">Once confirmed, their seat will be released immediately.</small>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="checkout-cancel-btn">Back</button>
+        <button class="btn-primary" id="checkout-confirm-btn">Confirm Check-Out</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let selectedBookingId = null;
+
+    function showToast(message, duration = 2500) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), duration);
+    }
+
+    async function loadReservedBookings() {
+      const spinner = document.getElementById("spinner");
+      const container = document.getElementById("reserved-list");
+      spinner.style.display = "block";
+      container.innerHTML = "";
+
+      const date = new Date().toLocaleDateString("en-CA");
+      const res = await fetch(`/api/admin/reserved-bookings?date=${date}`);
+      const data = await res.json();
+
+      spinner.style.display = "none";
+      if (!res.ok || !data.bookings || data.bookings.length === 0) {
+        container.innerHTML = '<p>No reserved bookings for today.</p>';
+        return;
+      }
+
+      data.bookings.forEach(b => {
+        const div = document.createElement("div");
+        div.classList.add("booking-card");
+        div.innerHTML = `
+          <b>${b.name}</b> (${b.roll_no}) - ${b.email}<br>
+          Seat: ${b.seat_id} | ${b.start_time} - ${b.end_time}<br>
+          Status: ${b.status}
+          ${
+            b.status === "reserved"
+              ? `<button class="checkin-btn" onclick="openCheckInModal(${b.id}, '${b.name}', '${b.seat_id}', '${b.zone}', '${b.start_time}', '${b.end_time}')">Check In</button>`
+              : b.status === "checked_in"
+              ? `<button class="checkin-btn" style="background:#dc3545" onclick="openCheckoutModal(${b.id}, '${b.name}', '${b.seat_id}')">Check Out</button>`
+              : '<span style="color:#888;">Checked Out</span>'
+          }
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openCheckInModal(id, name, seat, zone, start, end) {
+      selectedBookingId = id;
+      const modalBody = document.getElementById("checkin-modal-body");
+      modalBody.innerHTML = `
+        <div class="modal-row"><strong>Student</strong><span>${name}</span></div>
+        <div class="modal-row"><strong>Seat</strong><span>${seat}</span></div>
+        <div class="modal-row"><strong>Zone</strong><span>${zone}</span></div>
+        <div class="modal-row"><strong>Time</strong><span>${start} - ${end}</span></div>
+        <p style="margin-top:10px;color:#374151;">Confirm that this student has arrived and checked in?</p>
+      `;
+      document.getElementById("checkin-modal").classList.add("show");
+    }
+
+    async function confirmCheckIn() {
+      if (!selectedBookingId) return;
+      const btn = document.getElementById("checkin-confirm-btn");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+
+      try {
+        const res = await fetch("/api/admin/check-in", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ booking_id: selectedBookingId })
+        });
+        const data = await res.json();
+        showToast(data.message || "Check-in completed");
+        closeCheckInModal();
+        loadReservedBookings();
+      } catch (e) {
+        console.error(e);
+        showToast("Network error.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Confirm Check-In";
+        selectedBookingId = null;
+      }
+    }
+
+    function closeCheckInModal() {
+      document.getElementById("checkin-modal").classList.remove("show");
+    }
+
+    async function loadAnnouncements() {
+      const list = document.getElementById("announcements-list");
+      try {
+        const res = await fetch("/api/admin/announcements");
+        const data = await res.json();
+
+        if (!res.ok || !data.announcements || data.announcements.length === 0) {
+          list.innerHTML = "<p>No announcements available.</p>";
+          return;
+        }
+
+        list.innerHTML = "";
+        data.announcements.forEach(a => {
+          const div = document.createElement("div");
+          div.classList.add("announcement-card");
+          div.innerHTML = `
+            <h3>${a.title}</h3>
+            <small>${a.created_at}</small>
+            <p>${a.content}</p>
+          `;
+          list.appendChild(div);
+        });
+      } catch (error) {
+        console.error(error);
+        list.innerHTML = "<p>Failed to load announcements.</p>";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("load-seats").addEventListener("click", loadReservedBookings);
+      loadReservedBookings();
+      loadAnnouncements();
+    });
+
+    function openManualCheckIn() {
+      document.getElementById("manual-checkin-modal").classList.add("show");
+    }
+
+    function closeManualCheckIn() {
+      document.getElementById("manual-checkin-modal").classList.remove("show");
+    }
+
+    async function autoAssignSeat() {
+      const rawZone = document.getElementById("manual-zone").value;
+      const seatInput = document.getElementById("manual-seat");
+
+      if (!rawZone) {
+        seatInput.value = "";
+        return;
+      }
+
+      seatInput.value = "Finding free seat...";
+      try {
+        const res = await fetch(`/api/admin/free-seat?zone=${encodeURIComponent(rawZone)}`);
+        const data = await res.json();
+        console.log('free-seat response:', data);
+
+        if (data.free_seat) {
+          seatInput.value = data.free_seat;
+        } else if (data.example_rows_for_zone && data.example_rows_for_zone.length) {
+          const example = data.example_rows_for_zone.map(r => `${r.seat_number}(booked=${r.is_booked})`).slice(0,6).join(', ');
+          seatInput.value = `No free seats — found: ${example}`;
+        } else {
+          seatInput.value = data.message || "No free seat available";
+        }
+      } catch (err) {
+        console.error(err);
+        seatInput.value = "Error finding seat";
+      }
+    }
+
+    async function confirmManualCheckIn() {
+      const btn = document.getElementById("manual-checkin-confirm");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+
+      const emailOrRoll = document.getElementById("manual-email").value.trim();
+      const seat = document.getElementById("manual-seat").value.trim();
+      const zone = document.getElementById("manual-zone").value.trim();
+
+      if (!emailOrRoll || !seat || !zone) {
+        showToast("Please fill in all fields.");
+        btn.disabled = false;
+        btn.textContent = "Confirm Check-In";
+        return;
+      }
+
+      const payload = {
+        seat_id: seat,
+        zone: zone,
+        booking_date: new Date().toISOString().split("T")[0]
+      };
+
+      if (emailOrRoll.includes("@")) payload.email = emailOrRoll;
+      else payload.roll_no = emailOrRoll;
+
+      try {
+        const res = await fetch("/api/admin/manual-check-in", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        showToast(data.message || "Manual check-in completed");
+
+        if (res.ok) {
+          document.querySelectorAll('#manual-checkin-modal input').forEach(i => i.value = '');
+          closeManualCheckIn();
+          loadReservedBookings();
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Network error.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Confirm Check-In";
+      }
+    }
+
+    document.getElementById("manual-checkin-btn").addEventListener("click", openManualCheckIn);
+
+    let selectedCheckoutId = null;
+
+    function openCheckoutModal(id, name, seat) {
+      selectedCheckoutId = id;
+      document.getElementById("checkout-modal-body").innerHTML = `
+        <div class="modal-row"><strong>Student</strong><span>${name}</span></div>
+        <div class="modal-row"><strong>Seat</strong><span>${seat}</span></div>
+        <p style="margin-top:10px;color:#374151">Confirm check-out?</p>
+      `;
+      document.getElementById("checkout-modal").classList.add("show");
+    }
+
+    document.getElementById("checkout-cancel-btn").addEventListener("click", () => {
+      document.getElementById("checkout-modal").classList.remove("show");
+    });
+
+    document.getElementById("checkout-confirm-btn").addEventListener("click", async () => {
+      if (!selectedCheckoutId) return;
+      const btn = document.getElementById("checkout-confirm-btn");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+
+      try {
+        const res = await fetch("/api/admin/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ booking_id: selectedCheckoutId })
+        });
+        const data = await res.json();
+        showToast(data.message || "Checked out successfully");
+        document.getElementById("checkout-modal").classList.remove("show");
+        loadReservedBookings();
+      } catch (err) {
+        console.error(err);
+        showToast("Network error while checking out.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Confirm Check-Out";
+        selectedCheckoutId = null;
+      }
+    });
+  </script>
+</body>
+</html>

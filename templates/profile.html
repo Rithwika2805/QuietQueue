@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - QuietQueue</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #009DA0;
+            --secondary-color: #f39c12;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f5f7fb;
+            color: var(--text-color);
+        }
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .sidebar .logo {
+            font-size: 1.3em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid white;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            padding: 12px 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .sidebar .nav a:hover, .sidebar .nav a.active {
+            background: var(--primary-color);
+        }
+
+        .nav a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex-grow: 1;
+            padding: 30px;
+        }
+
+        .profile-header h2 {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .user-details {
+            margin-bottom: 30px;
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .user-details span {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .photo-upload {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .photo-placeholder {
+            width: 80px;
+            height: 80px;
+            background-color: #eee;
+            border-radius: 50%;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: #999;
+            overflow: hidden;
+        }
+
+        .photo-placeholder img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .photo-upload button {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .photo-upload button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .action-card h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .action-card input[type="email"],
+        .action-card input[type="text"],
+        .action-card input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .action-card button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .btn-save-changes {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-save-changes:hover {
+            background-color: #007f82;
+        }
+
+        .btn-change-password {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-change-password:hover {
+            background-color: #d68110;
+        }
+
+        .btn-logout {
+            float: right;
+            background-color: #009DA0;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: -80px;
+        }
+
+        .btn-logout:hover {
+            background-color: #007f82;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.8em;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .sidebar-footer p {
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: none;
+            }
+            .profile-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open"></i> QuietQueue
+            </div>
+            <nav class="nav">
+                <a href="{{ url_for('student_dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+                <a href="{{ url_for('seat_layout') }}"><i class="fa-solid fa-chair"></i> Book Seats</a>
+                <a href="{{ url_for('history') }}"><i class="fa-solid fa-clock-rotate-left"></i> Your Bookings</a>
+                <a href="{{ url_for('book_search') }}"><i class="fa-solid fa-magnifying-glass"></i> Search Books</a>
+                <a href="{{ url_for('profile') }}" class="active"><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="{{ url_for('contact') }}"><i class="fa-solid fa-envelope"></i> Contact Us</a>
+            </nav>
+            <div class="sidebar-footer">
+                <p>© 2025 QuietQueue</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="profile-header">
+                <h2 style="color: #009DA0;">My Profile</h2>
+                <form action="{{ url_for('logout') }}" method="POST">
+                    <button class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                </form>
+            </div>
+
+            <div class="user-details">
+                <p>Roll Number: <span>{{ user.roll_number }}</span></p>
+                <p>Name: <span>{{ user.full_name }}</span></p>
+                <p>Department: <span>{{ user.course }}</span></p>
+                <p>Semester: <span>{{ user.semester }}</span></p>
+            </div>
+
+            <div class="photo-upload">
+                <div class="photo-placeholder">
+                    {% if user.photo %}
+                        <img src="{{ url_for('static', filename='uploads/' + user.photo) }}" alt="Profile Photo">
+                    {% else %}
+                        <i class="fa-solid fa-user"></i>
+                    {% endif %}
+                </div>
+                <form action="{{ url_for('upload_photo') }}" method="POST" enctype="multipart/form-data">
+                    <label for="photo-upload-btn" style="display:none;"></label>
+                    <input id="photo-upload-btn" type="file" name="photo" accept="image/*" style="display:none;" onchange="this.form.submit()">
+                    <button type="button" onclick="document.getElementById('photo-upload-btn').click()">
+                        <i class="fa-solid fa-camera"></i> Upload Photo
+                    </button>
+                </form>
+            </div>
+
+            <div class="profile-actions">
+                <div class="action-card">
+                    <h3>Update Details</h3>
+                    <form action="{{ url_for('update_profile') }}" method="POST">
+                        <input type="email" name="email" placeholder="Email Address" value="{{ user.email }}" required>
+                        <input type="text" name="full_name" placeholder="Full Name" value="{{ user.full_name }}" required>
+                        <button type="submit" class="btn-save-changes">Save Changes</button>
+                    </form>
+                </div>
+
+                <div class="action-card">
+                    <h3>Change Password</h3>
+                    <form action="{{ url_for('change_password') }}" method="POST">
+                        <input type="password" name="new_password" placeholder="New Password" required>
+                        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                        <button type="submit" class="btn-change-password">Change Password</button>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>
