@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Profile | QuietQueue</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #009DA0;
+      --secondary-color: #0f172a;
+      --text-color: #111827;
+      --bg-light: #f9fafb;
+      --card-bg: #fff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+
+    body {
+      background: var(--bg-light);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+    }
+
+    .sidebar .logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 15px;
+      color: white;
+      font-size: 1.3em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar .nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      text-decoration: none;
+      padding: 12px 10px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar .nav a:hover,
+    .sidebar .nav a.active { background: var(--primary-color); }
+
+    .nav a i { margin-right: 15px; width: 20px; }
+
+    .main {
+      margin-left: 280px;
+      flex: 1;
+      padding: 30px;
+      position: relative;
+    }
+
+    /* 🔹 Logout button styles */
+    .logout-btn {
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: #00858a;
+      transform: translateY(-2px);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: var(--secondary-color);
+    }
+
+    .form-group { margin-bottom: 15px; }
+    label { font-weight: 500; display: block; margin-bottom: 6px; }
+
+    input[type="text"], input[type="email"], input[type="password"], input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      background: var(--primary-color);
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover { background: #00858a; }
+
+    .profile-pic-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary-color);
+      position: relative;
+    }
+
+    .upload-overlay {
+      position: absolute;
+      bottom: 0;
+      width: 120px;
+      height: 40px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      border-radius: 0 0 50% 50%;
+      opacity: 0;
+      transition: opacity 0.3s;
+      cursor: pointer;
+    }
+
+    .profile-pic-container:hover .upload-overlay { opacity: 1; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.8em;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .sidebar-footer p {
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111827;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 2000;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-book-open"></i>
+      QuietQueue
+    </div>
+    <nav class="nav">
+      <a href="/dashboard-admin"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="/manage-books"><i class="fa-solid fa-book"></i> Manage Books</a>
+      <a href="/manage-users"><i class="fa-solid fa-users"></i> Manage Users</a>
+      <a href="/announcements"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+      <a href="/admin-profile" class="active"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>© 2025 QuietQueue</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <button class="logout-btn" onclick="logout()">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </button>
+
+    <h1 style="color: #009DA0;">Admin Profile</h1>
+
+    <!-- Profile Edit Card -->
+    <div class="card">
+      <h2>Edit Profile</h2>
+      <div class="profile-pic-container">
+        <form id="photoForm" action="/upload-admin-photo" method="POST" enctype="multipart/form-data">
+          <div style="position: relative;">
+            <div class="profile-placeholder" id="profile-pic-wrapper">
+                {% if admin.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' + admin.photo) }}" id="profile-pic" class="profile-pic" alt="Profile Picture">
+                {% else %}
+                    <div class="photo-placeholder">
+                    <i class="fa-solid fa-user"></i>
+                    </div>
+                {% endif %}
+                <label for="photo-input" class="upload-overlay">Change Photo</label>
+                <input type="file" name="photo" id="photo-input" accept="image/*" style="display:none">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <form id="profileForm" action="/update-admin-profile" method="POST">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="full_name" value="{{ admin.full_name }}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" value="{{ admin.email }}" required>
+        </div>
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="card">
+      <h2>Change Password</h2>
+      <form id="passwordForm" action="/update-admin-password" method="POST">
+        <div class="form-group">
+          <label>Old Password</label>
+          <input type="password" name="old_password" required>
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" name="new_password" required>
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" name="confirm_password" required>
+        </div>
+        <button type="submit">Update Password</button>
+      </form>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    function showToast(msg, duration=2500) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    function logout() {
+      fetch('/logout', { method: 'POST' })
+      .then(res => {
+        if (res.ok) {
+          showToast('Logging out...');
+          setTimeout(() => window.location.href = '/login', 1200);
+        } else {
+          showToast('Logout failed. Try again.');
+        }
+      })
+      .catch(() => showToast('Network error.'));
+    }
+
+    document.getElementById('photo-input').addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const placeholder = document.getElementById('profile-placeholder');
+            if (placeholder) placeholder.remove();
+
+            let img = document.getElementById('profile-pic');
+            if (!img) {
+                img = document.createElement('img');
+                img.id = 'profile-pic';
+                img.className = 'profile-pic';
+                document.getElementById('profile-pic-wrapper').prepend(img);
+            }
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        document.getElementById('photoForm').submit();
+        showToast('Uploading photo...');
+      }
+    });
+  </script>
+</body>
+</html>
